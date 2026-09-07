@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- `jj` (v0.1.2): document pushing to a remote in the `working-with-jj`
+  skill - jj only pushes commits reachable from a tracked bookmark, so a
+  freshly `jj commit`-ed unnamed change makes `jj git push` report
+  "Nothing changed". The skill now spells out the publish flow (`jj
+  bookmark set main -r @` / `-r @-`, then `jj git push`) and warns off
+  `jj bookmark move -r` (that subcommand takes `--from`/`--to` and errors
+  on a single `-r` target) in favor of `jj bookmark set <name> -r <rev>`.
+
 ### Added
 - `nats` (v0.2.0): **config-home isolation** - the channel server now derives
   its state root from `CLAUDE_CONFIG_DIR` when set (used exclusively, never

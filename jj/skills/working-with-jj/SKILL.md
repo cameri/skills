@@ -133,6 +133,19 @@ jj does not support git submodules. When working inside a git submodule or manag
 
 Use jj only for the parent repository (non-submodule paths).
 
+**Pushing to a Remote — bookmarks gate what gets pushed:**
+
+jj only pushes commits that are reachable from a tracked bookmark. A change you `jj commit` but never put on a bookmark is an *unnamed* change: `jj git push` reports `Nothing changed` / `No bookmarks/tags found in the default push revset` and the work silently stays local. `/jj:commit` describes the change; it does not publish it — pushing is a separate explicit step.
+
+To publish work:
+
+1. Advance the repo's tracking bookmark (`main` here) to your change:
+   - `jj bookmark set main -r @` — if your work *is* the current change
+   - `jj bookmark set main -r @-` — if `@` is an empty working copy sitting on top of the real commit (the common case right after `jj commit`, which lands the commit at `@-` and leaves a fresh empty `@`)
+2. `jj git push` — pushes that bookmark's new commits to origin.
+
+Do NOT reach for `jj bookmark move` to do this. `move` relocates a bookmark's position *range* and takes `--from`/`--to` revsets, not a single `-r` target — `jj bookmark move main -r @` fails with a usage error. `jj bookmark set <name> -r <rev>` is the command that points a bookmark at a commit. Inspect the current mapping with `jj bookmark list` before moving anything.
+
 **`jj restore` — Use With Care:**
 
 `jj restore --from <rev> -- <path>` replaces the target path's content with the state from `<rev>`. **Any file present in `--to` but absent in `--from` will be deleted.** This has caused accidental mass-deletions when the source revision didn't include recently added files.
