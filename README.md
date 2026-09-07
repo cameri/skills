@@ -34,7 +34,7 @@ Monorepo of Claude Code plugins and slash commands by Ricardo Arturo Cabral Mej�
 | [replicator](./replicator/) | Grows and prunes this instance's own skill set — captures reusable procedures during work, and nightly meditates on usage history and frontier sources to build or mute skills with scrutiny; publishes a gene registry over Nostr and mirrors it to a GitHub gist | Claude |
 | [repo-hygiene-sweep](./repo-hygiene-sweep/) | Sweep every standalone repo in a multi-repo workspace for uncommitted or unpushed work, without missing the ones a plain `git status`/`jj status` from the workspace root can't see | Claude |
 | [research-tools](./research-tools/) | Deliberately-invoked research skills — competitive analysis, deep-dive investigation, feasibility checks, landscape mapping, options comparison, and technical implementation research | Claude |
-| [sandbox-manager](./sandbox-manager/) | Manage the Claude Code sandbox itself — restart sessions, manage its own plugins/marketplaces, and check post-restart health | Claude |
+| [sandbox-manager](./sandbox-manager/) | Manage the Claude Code sandbox itself — restart sessions, manage its own plugins/marketplaces, run post-restart health checks, and set up herdr for remote SSH attach | Claude |
 | [simple-english](./simple-english/) | Write or rewrite technical text with the rules of ASD-STE100 Simplified Technical English so it is clear, unambiguous, and free of AI slop | Claude |
 | [technitium-dns](./technitium-dns/) | Manage a self-hosted Technitium DNS Server — zones, records, stats, and cache | Claude + Cursor |
 | [telegram](./telegram/) | Telegram channel for Claude Code — messaging bridge with built-in access control, pairing, and full Bot API coverage including voice note transcription | Claude |
@@ -185,6 +185,7 @@ Monorepo of Claude Code plugins and slash commands by Ricardo Arturo Cabral Mej�
 | `sandbox-manager:setup-hooks` | Installs the curated hook set (rm guard, channel-reply enforcement, usage alerts, idle tracker, session handoff reader, new-session notifier, statusline cache wrapper, and more) |
 | `sandbox-manager:check-login-expiry` | Checks whether this session's login is about to expire and reports over Telegram if so; fires on a daily cronjobs job |
 | `sandbox-manager:post-restart-check` | Post-restart health check — SSH signing key still has its public half, Docker Buildx present, no Containerfile pip package silently dropped by a rebuild |
+| `sandbox-manager:herdr-remote-ssh` | Sets up and verifies herdr remote attach over SSH (`herdr --remote`): key-only sshd, sshd `SetEnv` env parity, detached-daemon requirement; diagnoses attaches that land in a fresh empty session |
 | `sandbox-manager:whats-next` | Writes a comprehensive `whats-next.md` handoff document so work can resume with zero information loss after a context reset or restart |
 | `sandbox-manager:add-to-todos` | Adds an item to `TO-DOS.md` with full context from the conversation, checking for near-duplicates first |
 | `sandbox-manager:check-todos` | Lists outstanding items from `TO-DOS.md` and helps pick one to work on next |

@@ -1,16 +1,2 @@
-{
-  "name": "sandbox-manager",
-  "description": "Manage the Claude Code sandbox itself — restart sessions, manage its own plugins/marketplaces, and check post-restart health.",
-  "version": "0.18.13",
-  "keywords": [
-    "sandbox",
-    "tmux",
-    "herdr",
-    "session",
-    "self-management",
-    "plugins",
-    "marketplace",
-    "hooks",
-    "health-check"
-  ]
-}
+  "description": "Manage the Claude Code sandbox itself — restart sessions, manage its own plugins/marketplaces, run post-restart health checks, and set up herdr for remote SSH attach.",
+  "version": "0.19.0",

@@ -386,7 +386,7 @@
     },
     {
       "name": "sandbox-manager",
-      "description": "Manage the Claude Code sandbox itself — restart sessions, manage its own plugins/marketplaces, and check post-restart health.",
+      "description": "Manage the Claude Code sandbox itself — restart sessions, manage its own plugins/marketplaces, run post-restart health checks, and set up herdr for remote SSH attach.",
       "tools": [
         "claude"
       ],

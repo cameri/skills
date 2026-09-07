@@ -1,12 +1,12 @@
 {
   "name": "sandbox-manager",
-  "version": "0.18.12",
+  "version": "0.19.0",
   "private": true,
-  "description": "Manage the Claude Code sandbox itself — restart sessions, manage its own plugins/marketplaces, and check post-restart health.",
+  "description": "Manage the Claude Code sandbox itself — restart sessions, manage its own plugins/marketplaces, run post-restart health checks, and set up herdr for remote SSH attach.",
   "pi": {
     "name": "sandbox-manager",
-    "version": "0.18.12",
-    "description": "Manage the Claude Code sandbox itself — restart sessions, manage its own plugins/marketplaces, and check post-restart health.",
+    "version": "0.19.0",
+    "description": "Manage the Claude Code sandbox itself — restart sessions, manage its own plugins/marketplaces, run post-restart health checks, and set up herdr for remote SSH attach.",
     "extensions": [
       "extensions/"
     ]
