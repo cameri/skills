@@ -4,7 +4,7 @@ description: Sends the current work to a background agent so the interactive pan
 user-invocable: false
 allowed-tools:
   - Bash
-  - mcp__plugin_telegram_telegram__reply
+  - mcp__plugin_telegram-ng_telegram__reply
 ---
 
 <essential_principles>

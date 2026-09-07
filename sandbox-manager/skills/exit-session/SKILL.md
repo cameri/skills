@@ -5,7 +5,7 @@ user-invocable: false
 allowed-tools:
   - Bash
   - ListAgents
-  - mcp__plugin_telegram_telegram__reply
+  - mcp__plugin_telegram-ng_telegram__reply
 ---
 
 <essential_principles>

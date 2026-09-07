@@ -4,7 +4,7 @@ description: Exports the current Claude Code conversation to a file by sending /
 user-invocable: false
 allowed-tools:
   - Bash
-  - mcp__plugin_telegram_telegram__reply
+  - mcp__plugin_telegram-ng_telegram__reply
 ---
 
 <essential_principles>

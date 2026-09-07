@@ -3,7 +3,7 @@ name: manage-plugins
 description: Use when asked to add a plugin marketplace, or install, update, enable, disable, or uninstall a Claude Code plugin for this sandbox's own running session — e.g. a request (Telegram or otherwise) to "add plugin X", "install the Y skill", or "remove marketplace Z".
 allowed-tools:
   - Bash
-  - mcp__plugin_telegram_telegram__reply
+  - mcp__plugin_telegram-ng_telegram__reply
 ---
 
 <objective>

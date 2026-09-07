@@ -1,7 +1,7 @@
 {
   "name": "sandbox-manager",
   "description": "Manage the Claude Code sandbox itself — restart sessions, manage its own plugins/marketplaces, and check post-restart health.",
-  "version": "0.18.12",
+  "version": "0.18.13",
   "keywords": [
     "sandbox",
     "tmux",

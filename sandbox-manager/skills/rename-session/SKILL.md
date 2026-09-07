@@ -4,7 +4,7 @@ description: Names or renames the current Claude Code session by sending /rename
 user-invocable: false
 allowed-tools:
   - Bash
-  - mcp__plugin_telegram_telegram__reply
+  - mcp__plugin_telegram-ng_telegram__reply
 ---
 
 <essential_principles>

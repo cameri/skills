@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `sandbox-manager` (v0.18.13): the remote-control skills (restart-session,
+  exit-session, resume-session, rename-session, branch-session,
+  compact-session, export-session, check-login-expiry, background-session,
+  manage-plugins) still listed `mcp__plugin_telegram_telegram__reply` in
+  their `allowed-tools` frontmatter, a leftover from the official `telegram`
+  plugin this sandbox no longer runs. Since switching to `telegram-ng`, the
+  real tool is `mcp__plugin_telegram-ng_telegram__reply` — the name mismatch
+  meant a skill's channel-reply step wasn't pre-approved, which could stall
+  the turn before the pane-restart script ever ran (observed live: `/clear`
+  from Telegram stopped resetting the session). Updated all ten SKILL.md
+  files to the `telegram-ng` tool name.
+
 ### Changed
 - `jj` (v0.1.2): document pushing to a remote in the `working-with-jj`
   skill - jj only pushes commits reachable from a tracked bookmark, so a
