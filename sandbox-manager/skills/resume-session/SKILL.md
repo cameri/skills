@@ -4,7 +4,7 @@ description: Restores a named Claude Code session by sending /resume <name> foll
 user-invocable: false
 allowed-tools:
   - Bash
-  - mcp__plugin_telegram_telegram__reply
+  - mcp__plugin_telegram-ng_telegram__reply
 ---
 
 <essential_principles>

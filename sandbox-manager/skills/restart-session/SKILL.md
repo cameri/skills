@@ -4,7 +4,7 @@ description: Restarts the current Claude Code session by sending /clear (Claude 
 user-invocable: false
 allowed-tools:
   - Bash
-  - mcp__plugin_telegram_telegram__reply
+  - mcp__plugin_telegram-ng_telegram__reply
 ---
 
 <essential_principles>

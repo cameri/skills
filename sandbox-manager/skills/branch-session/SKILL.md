@@ -4,7 +4,7 @@ description: Creates a branch of the current Claude Code conversation at the cur
 user-invocable: false
 allowed-tools:
   - Bash
-  - mcp__plugin_telegram_telegram__reply
+  - mcp__plugin_telegram-ng_telegram__reply
 ---
 
 <essential_principles>

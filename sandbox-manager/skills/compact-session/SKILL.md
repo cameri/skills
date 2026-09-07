@@ -4,7 +4,7 @@ description: Compacts the current Claude Code session's conversation by sending 
 user-invocable: false
 allowed-tools:
   - Bash
-  - mcp__plugin_telegram_telegram__reply
+  - mcp__plugin_telegram-ng_telegram__reply
 ---
 
 <essential_principles>

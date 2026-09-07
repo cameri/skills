@@ -4,7 +4,7 @@ description: Checks whether this Claude Code session's login is about to expire,
 user-invocable: false
 allowed-tools:
   - Bash
-  - mcp__plugin_telegram_telegram__reply
+  - mcp__plugin_telegram-ng_telegram__reply
 ---
 
 <essential_principles>
