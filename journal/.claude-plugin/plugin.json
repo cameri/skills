@@ -1,6 +1,6 @@
 {
   "name": "journal",
   "description": "Keeps a series of narrative journals about what the user has been doing, written from Claude's own perspective by reading session history across every project on this machine plus the memory system.",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "keywords": ["journal", "memory", "narrative", "history", "self-management"]
 }

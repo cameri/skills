@@ -59,19 +59,37 @@ Next update's section.
    as having no cutoff for this step, or as a continuation of the digest already in
    hand from that same run.
 
-3. Run the extraction script to get the raw material for this update:
+3. Run the extraction script to get the raw material for this update.
+
+   Resolve the plugin dir from THIS file's own path — never guess a cache path:
 
    ```bash
-   python3 <plugin-dir>/skills/update-journal/scripts/extract_sessions.py \
+   PLUGIN_DIR="$(dirname "$(dirname "$(dirname <path-to-this-SKILL.md>)")")"
+   test -f "$PLUGIN_DIR/skills/update-journal/scripts/extract_sessions.py" \
+     || { echo "not found at $PLUGIN_DIR - locating:"; find ~/.omp/plugins/cache -name extract_sessions.py 2>/dev/null; }
+   ```
+
+   Layout note: omp installs plugins under
+   `~/.omp/plugins/cache/marketplaces/<marketplace>/<plugin>/`. There is no
+   `~/.omp/plugins/cache/plugins/<marketplace>___<plugin>___<version>/` layout
+   (that is Claude Code's cache shape). If the resolved path does not exist,
+   locate the script with the `find` above and use that path — a missing script
+   is an ERROR to fix, never an empty digest.
+
+   Then run it:
+
+   ```bash
+   python3 "$PLUGIN_DIR/skills/update-journal/scripts/extract_sessions.py" \
      --since "<last_synced, if any>"
    ```
 
-   (`<plugin-dir>` is wherever this plugin is installed — find it relative to this
-   SKILL.md file's own path.) The output ends with a line like
+   The output ends with a line like
    `--- digest: 42 entries, 8931 chars ---` — read that summary first.
 
 4. If the digest is `0 entries`: there is nothing new. Report that and stop — do not
-   touch any file.
+   touch any file. But 0 entries is only trustworthy if the script actually ran
+   (you saw its `--- digest: 0 entries ... ---` line). A script that failed to
+   run or wasn't found is NOT an empty digest — fix the path and retry.
 
 5. Decide, as a rough guide (not a strict rule — use judgment): a digest in the
    low tens of thousands of characters is comfortably small enough to read directly
