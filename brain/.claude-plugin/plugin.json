@@ -1,6 +1,6 @@
 {
   "name": "brain",
   "description": "Workspace-wide knowledge + agent-workflow graph, backed by LatticeDB. learn_from syncs a graph-json snapshot (nodes/links/hyperedges, defaulting to graphify-out/graph.json) in; recall queries it via Cypher; study_status reports staleness and an estimated re-study cost for any previously-learned path.",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "keywords": ["knowledge-graph", "latticedb", "graphify", "cypher"]
 }

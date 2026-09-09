@@ -3,7 +3,7 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { dirname, join } from "node:path";
-import { openBrain } from "./src/db";
+import { openBrain, resolveProjectDir } from "./src/db";
 import { syncSource } from "./src/learn-from";
 import { graphifyOutAdapter } from "./src/sources/graphify-out";
 import { recall } from "./src/recall";
@@ -143,7 +143,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
     const db = await openBrain();
     try {
-      const root = process.env.CLAUDE_PROJECT_DIR!; // resolveBrainPath already validated this is set
+      const root = resolveProjectDir();
       const graphJsonPath = path ?? join(root, "graphify-out", "graph.json");
       const adapter = graphifyOutAdapter(graphJsonPath);
       const result = await syncSource(db, adapter);

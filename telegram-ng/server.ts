@@ -681,10 +681,11 @@ async function handleIdleCallback(ctx: Context, choice: 'compact' | 'pause' | 'd
 // different one), so equality-matching it silently flagged the wrong
 // session as current and made the real one look like a distinct,
 // resumable "previous session".
-const CLAUDE_PROJECT_DIR = process.env.CLAUDE_PROJECT_DIR
-const TRANSCRIPTS_DIR = CLAUDE_PROJECT_DIR
-  ? join(homedir(), '.claude', 'projects', CLAUDE_PROJECT_DIR.replace(/\//g, '-'))
-  : null
+// Fallback to /workspace (this deployment's canonical workspace root) so the
+// picker still works where the launcher doesn't set the var; explicit env
+// always wins, so portability is intact.
+const CLAUDE_PROJECT_DIR = process.env.CLAUDE_PROJECT_DIR || '/workspace'
+const TRANSCRIPTS_DIR = join(homedir(), '.claude', 'projects', CLAUDE_PROJECT_DIR.replace(/\//g, '-'))
 const SESSIONS_REGISTRY_DIR = join(homedir(), '.claude', 'sessions')
 const SESSIONS_LIMIT = 10
 

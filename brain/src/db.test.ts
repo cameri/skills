@@ -1,9 +1,8 @@
 import { expect, test } from "bun:test";
-import { resolveBrainPath, openBrain } from "./db";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-
+import { resolveBrainPath, resolveProjectDir, openBrain } from "./db";
 test("resolveBrainPath uses CLAUDE_PROJECT_DIR", () => {
   const prior = process.env.CLAUDE_PROJECT_DIR;
   process.env.CLAUDE_PROJECT_DIR = "/tmp/fake-workspace";
@@ -12,12 +11,19 @@ test("resolveBrainPath uses CLAUDE_PROJECT_DIR", () => {
   else process.env.CLAUDE_PROJECT_DIR = prior;
 });
 
-test("resolveBrainPath throws when CLAUDE_PROJECT_DIR is unset", () => {
+test("resolveProjectDir falls back to /workspace when env unset and cwd has no brain/", () => {
   const prior = process.env.CLAUDE_PROJECT_DIR;
   delete process.env.CLAUDE_PROJECT_DIR;
-  expect(() => resolveBrainPath()).toThrow(/CLAUDE_PROJECT_DIR/);
-  if (prior !== undefined) process.env.CLAUDE_PROJECT_DIR = prior;
+  const cwd = process.cwd();
+  process.chdir(tmpdir());
+  try {
+    expect(resolveProjectDir()).toBe("/workspace");
+  } finally {
+    process.chdir(cwd);
+    if (prior !== undefined) process.env.CLAUDE_PROJECT_DIR = prior;
+  }
 });
+
 
 test("openBrain creates the db file and parent dir if missing", async () => {
   const dir = mkdtempSync(join(tmpdir(), "brain-db-test-"));

@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
+import { resolveProjectDir } from "../db";
 import type { SourceAdapter, SourceNode, SourceEdge, SourceSnapshot } from "./types";
 
 interface GraphifyNode {
@@ -102,12 +103,11 @@ function capitalize(s: string): string {
 // graph-json files (e.g. two projects' own graphify-out/graph.json, synced
 // via learn_from's `path` override) must never share a tag, or syncSource's
 // existing-node diff for one corpus would see and delete the other's nodes.
-// The workspace's own default corpus (CLAUDE_PROJECT_DIR/graphify-out) keeps
+// The workspace's own default corpus (resolveProjectDir()/graphify-out) keeps
 // the plain legacy "graphify-out" tag so already-synced data isn't orphaned.
 function sourceNameFor(graphJsonPath: string): string {
   const dir = resolve(dirname(graphJsonPath));
-  const projectDir = process.env.CLAUDE_PROJECT_DIR;
-  const defaultDir = projectDir ? resolve(join(projectDir, "graphify-out")) : undefined;
+  const defaultDir = resolve(join(resolveProjectDir(), "graphify-out"));
   return dir === defaultDir ? "graphify-out" : `graphify-out:${dir}`;
 }
 
