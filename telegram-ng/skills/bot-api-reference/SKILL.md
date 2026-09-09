@@ -20,13 +20,15 @@ Arguments passed: `$ARGUMENTS`
 </objective>
 
 <quick_start>
-Read the one file relevant to the task — don't read all five unless the task
+Read the one file relevant to the task — don't read all six unless the task
 genuinely spans them.
 
 - Adding/changing what updates the bot receives, polling vs. webhook setup →
   `references/updates-and-polling.md`.
-- Formatting outgoing text, parsing `@mentions`/links/commands out of incoming
-  text, editing or deleting a sent message → `references/messages-and-entities.md`.
+- Sending or formatting outgoing text — including Bot API 10.1+ Rich Messages →
+  `references/rich-messages.md` (grammar) and `references/messages-and-entities.md`
+  (methods); parsing `@mentions`/links/commands out of incoming text, editing or
+  deleting a sent message → `references/messages-and-entities.md`.
 - Anything about group behavior: what the bot can see by default, moderation
   actions, admin rights, invite links, join requests →
   `references/groups-and-privacy.md`.
@@ -44,6 +46,7 @@ genuinely spans them.
 | `references/groups-and-privacy.md` | Privacy mode behavior, chat types, `ChatMember` status model, `ChatPermissions`/`ChatAdministratorRights`, ban/restrict/promote/invite-link/join-request methods |
 | `references/files-and-media.md` | `file_id`/`file_unique_id`/`file_path`, the three ways to send a file, per-method size limits, media type objects (`Photo`/`Video`/`Audio`/`Document`/`Voice`/etc.), `getFile` |
 | `references/inline-keyboards-and-callbacks.md` | `InlineKeyboardMarkup`/`InlineKeyboardButton`, `callback_data` (1-64 bytes), `CallbackQuery`, `answerCallbackQuery`, `editMessageReplyMarkup` |
+| `references/rich-messages.md` | Rich Messages (Bot API 10.1+, fetched live 2026-09-09): `sendRichMessage`/`InputRichMessage`, the Rich Markdown grammar (GFM-style), limits, practical reply-formatting rules |
 </reference_guides>
 
 <context>
@@ -55,10 +58,11 @@ genuinely spans them.
   looks stale, re-fetch https://core.telegram.org/bots/api directly rather
   than guessing from memory — don't silently patch these files from
   training-data recall.
-- Several 10.x features (Rich Messages, Gifts, Stories, Business accounts,
-  Suggested Posts, Telegram Passport, Games, Payments) are intentionally
-  **not** covered here — `telegram-ng` doesn't use them. If a future task
-  needs one of those, fetch the upstream doc directly rather than expecting
+- Rich Messages **are** covered — added 2026-09-09 as
+  `references/rich-messages.md`, sourced from a live fetch of the 10.3 API page
+  and /bots/features. Gifts, Stories, Business accounts, Suggested Posts, Telegram
+  Passport, Games, Payments remain intentionally **not** covered here — if a future
+  task needs one of those, fetch the upstream doc directly rather than expecting
   it in these files.
 </context>
 
