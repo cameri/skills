@@ -12,6 +12,7 @@ Monorepo of Claude Code plugins and slash commands by Ricardo Arturo Cabral Mej�
 | [anydoc](./anydoc/) | Convert Word, PowerPoint, Excel, OpenDocument, RTF, EPUB, CSV, and PDF files to clean GitHub-Flavored Markdown via the anydoc CLI | Claude + Cursor |
 | [audiobookshelf](./audiobookshelf/) | Interact with a self-hosted Audiobookshelf instance — list libraries, browse and search library items, and check listening progress | Claude + Cursor |
 | [autoresearch](./autoresearch/) | Autonomously optimize Claude Code skills using Karpathy's autoresearch methodology — binary evals, prompt mutation, and iterative improvement loops | Claude |
+| [blueprints](./blueprints/) | Creates vendor-agnostic capability blueprints — self-contained spec packages any LLM with a different architecture can implement for itself; also reverse-engineers blueprints from existing implementations and maintains them as living specs | Claude + Cursor |
 | [brain](./brain/) | Workspace-wide knowledge graph backed by LatticeDB — syncs a graph-json snapshot in, defaulting to graphify's output (`learn_from`), answers questions over it via Cypher (`recall`), writes/links a single fact directly (`remember`), soft- or permanently deletes a node/edge (`forget`), and reports staleness/cost-to-re-study for any previously-learned path (`study_status`) | Claude + Cursor |
 | [consider](./consider/) | Apply a decision-making framework — inversion, first-principles, second-order effects, Pareto, via negativa, opportunity cost, or Eisenhower prioritization — to a real decision or tradeoff moment | Claude + Cursor |
 | [cronjobs](./cronjobs/) | Schedule recurring or one-time jobs using natural language — 'every 3 minutes', 'every weekday at 9am', 'once in 5 minutes' | Claude |
@@ -80,6 +81,12 @@ Monorepo of Claude Code plugins and slash commands by Ricardo Arturo Cabral Mej�
 | `/audiobookshelf:access` | Set up Audiobookshelf credentials — save the server URL and API key |
 | `/audiobookshelf:query-library` | List libraries, browse or search items, view item details, check listening progress |
 | `/actual-budget:add-transaction` | Add a transaction — spending, income, or any financial event |
+
+### blueprints
+
+| Skill | Description |
+|---|---|
+| `blueprints:create-blueprint` | Author a new vendor-agnostic capability blueprint (interview-driven), reverse-engineer one from an existing implementation, or update an existing blueprint as a living spec — emits a self-contained package (BLUEPRINT.md + modules/scripts/skeleton/templates) any LLM can implement without the authoring conversation |
 
 ### brain
 

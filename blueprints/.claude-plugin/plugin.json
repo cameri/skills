@@ -1,0 +1,6 @@
+{
+  "name": "blueprints",
+  "description": "Creates vendor-agnostic capability blueprints — self-contained specification packages that any LLM with a different architecture can implement for itself, without access to the authoring conversation. Also reverse-engineers blueprints from existing implementations and maintains them as living specs.",
+  "version": "0.1.0",
+  "keywords": ["blueprint", "specification", "portability", "handoff", "architecture"]
+}

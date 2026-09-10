@@ -104,6 +104,20 @@
       "source": "./autoresearch"
     },
     {
+      "name": "blueprints",
+      "description": "Creates vendor-agnostic capability blueprints — self-contained specification packages that any LLM with a different architecture can implement for itself, without access to the authoring conversation. Also reverse-engineers blueprints from existing implementations and maintains them as living specs.",
+      "tools": [
+        "claude",
+        "cursor"
+      ],
+      "category": "developer-tools",
+      "author": {
+        "name": "Ricardo Arturo Cabral Mejía",
+        "email": "cameri@users.noreply.github.com"
+      },
+      "source": "./blueprints"
+    },
+    {
       "name": "brain",
       "description": "Workspace-wide knowledge graph backed by LatticeDB — syncs a graph-json snapshot in (defaulting to graphify's output), answers questions via Cypher, writes/links individual facts, soft- or permanently forgets a node/edge, and reports staleness/cost-to-re-study for any previously-learned path.",
       "tools": [
