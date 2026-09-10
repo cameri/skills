@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`blueprints` (v0.1.0, new plugin)**: `create-blueprint` creates vendor-agnostic
+  capability blueprints — self-contained specification packages (`BLUEPRINT.md` +
+  `modules/`, `scripts/`, `skeleton/`, `templates/`) that any LLM with a different
+  architecture can implement for itself without access to the authoring
+  conversation. Three workflows: author (interview-driven), reverse-engineer
+  (distill an existing implementation, with evidence-traced requirements, marked
+  inference, and a Preservation List), and update (living-spec rules — version
+  bump, changelog, supersede-not-delete). Every blueprint is audited against ten
+  binding principles: vendor-agnostic, portable, self-contained,
+  predictable/intuitive/ergonomic, idempotent/deterministic, parameterized/modular,
+  dependencies called out, applicable context stated, configuration flexibility,
+  and pluggable.
+
 ### Fixed
 - `sandbox-manager` (v0.18.13): the remote-control skills (restart-session,
   exit-session, resume-session, rename-session, branch-session,
