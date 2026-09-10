@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **`sandbox-manager` (v0.19.0)**: new `herdr-remote-ssh` skill plus
+  `scripts/setup-herdr-sshd.sh` (idempotent sshd bootstrap) and
+  `scripts/check-herdr-remote.sh` (readiness and failure-mode diagnostics),
+  backing the `herdr --remote` diagnosis into the plugin: key-only sshd
+  transport, sshd `SetEnv` parity (`XDG_CONFIG_HOME`, `HERDR_SESSION`), and the
+  detached-daemon requirement (a `setsid` session leader) that `herdr --remote`
+  checks before attaching. Skill row added to the README; description synced
+  across `package.json`, `plugin.json`, and `marketplace.json`.
 - **`blueprints` (v0.1.0, new plugin)**: `create-blueprint` creates vendor-agnostic
   capability blueprints — self-contained specification packages (`BLUEPRINT.md` +
   `modules/`, `scripts/`, `skeleton/`, `templates/`) that any LLM with a different
@@ -20,8 +28,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   predictable/intuitive/ergonomic, idempotent/deterministic, parameterized/modular,
   dependencies called out, applicable context stated, configuration flexibility,
   and pluggable.
+  **Superseded (2026-09-10)**: the `cameri/schematics` repo (the `schematics`
+  plugin) is the live line of work; `blueprints@cameri-skills` was uninstalled
+  from phoenix. The plugin source stays here pending a decision to delete it.
 
 ### Fixed
+- `journal` (v0.1.4): the `update-journal` skill resolved the extractor path
+  against the Claude Code plugin-cache layout
+  (`plugins/cache/plugins/<marketplace>___<plugin>___<version>/`) instead of
+  omp's (`plugins/cache/marketplaces/<marketplace>/<plugin>/`), so the writer
+  reported a false `0 entries` digest. Step 3 now derives `PLUGIN_DIR` from the
+  SKILL.md's own path (with the layout note and a `find` fallback), and step 4
+  states that a missing script is an error to fix, never an empty digest.
+- `brain` (v0.4.3) and `telegram-ng` (v0.13.1): project/transcript directory
+  resolution hardened against per-harness config homes. `brain`'s
+  `resolveProjectDir` follows `CLAUDE_PROJECT_DIR`, then a cwd that already
+  contains the brain, then `/workspace`; `telegram-ng`'s transcript dir falls
+  back to `/workspace` the same way.
 - `sandbox-manager` (v0.18.13): the remote-control skills (restart-session,
   exit-session, resume-session, rename-session, branch-session,
   compact-session, export-session, check-login-expiry, background-session,

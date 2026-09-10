@@ -84,6 +84,10 @@ Monorepo of Claude Code plugins and slash commands by Ricardo Arturo Cabral MejÃ
 
 ### blueprints
 
+> **Superseded (2026-09-10)** by the external [`cameri/schematics`](https://github.com/cameri/schematics)
+> repo (the `schematics` plugin). Kept in this repo until that line of work is
+> proven; no longer installed on phoenix.
+
 | Skill | Description |
 |---|---|
 | `blueprints:create-blueprint` | Author a new vendor-agnostic capability blueprint (interview-driven), reverse-engineer one from an existing implementation, or update an existing blueprint as a living spec â€” emits a self-contained package (BLUEPRINT.md + modules/scripts/skeleton/templates) any LLM can implement without the authoring conversation |
