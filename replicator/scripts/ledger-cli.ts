@@ -1,5 +1,7 @@
 #!/usr/bin/env bun
-import { readFileSync } from 'fs'
+import { readFileSync, readdirSync } from 'fs'
+import { homedir } from 'os'
+import { join } from 'path'
 import {
   registerGene,
   recordInvocation,
@@ -48,6 +50,39 @@ function flag(args: string[], name: string): string | undefined {
   return i >= 0 ? args[i + 1] : undefined
 }
 
+// Plugin names installed in the harness that is running this command, used
+// only to break a tie between two genes carrying the same skill name
+// (`check-todos` exists in both `sandbox-manager` and `taches-cc-resources`,
+// but only the former is installed here). Deliberately the *current* harness's
+// install set: the Claude Code plugin cache is a leftover from before the omp
+// migration and still lists plugins like `taches-cc-resources` that nothing
+// runs any more — counting those would re-create exactly the ambiguity being
+// resolved. Read from omp's own registry, falling back to its cache layout
+// (`<marketplace>___<plugin>___<version>`).
+function installedPluginNames(): Set<string> {
+  const pluginsRoot = join(homedir(), '.omp/plugins')
+  const names = new Set<string>()
+  try {
+    const registry = JSON.parse(readFileSync(join(pluginsRoot, 'installed_plugins.json'), 'utf8')) as {
+      plugins?: Record<string, unknown>
+    }
+    for (const id of Object.keys(registry.plugins ?? {})) names.add(id.split('@')[0])
+  } catch {
+    // fall through to the cache scan below
+  }
+  if (names.size === 0) {
+    try {
+      for (const entry of readdirSync(join(pluginsRoot, 'cache/plugins'))) {
+        const triple = entry.split('___')
+        if (triple.length === 3) names.add(triple[1])
+      }
+    } catch {
+      // no plugin registry and no cache: resolution falls back to bare names
+    }
+  }
+  return names
+}
+
 function main(): void {
   const [cmd, ...args] = process.argv.slice(2)
   let ledger = loadLedger(STATE_DIR)
@@ -74,10 +109,11 @@ function main(): void {
       if (!inputPath) throw new Error('record requires --input <path>')
       const date = flag(args, 'date') ?? today()
       const counts = parseSkillUsage(readFileSync(inputPath, 'utf8'))
+      const installed = installedPluginNames()
       for (const [rawKey, count] of Object.entries(counts)) {
-        // Bare omp skill names resolve to their plugin-qualified gene before
-        // registration; a namespaced or already-existing key passes through.
-        const key = resolveGeneKey(ledger, rawKey)
+        // Bare skill names resolve to their plugin-qualified gene before
+        // registration (see resolveGeneKey); a namespaced key passes through.
+        const key = resolveGeneKey(ledger, rawKey, installed)
         // Auto-registration must use the same `date` string this loop is
         // about to record the invocation against — not a freshly computed
         // nowISO() — or born can end up after the invocation it was

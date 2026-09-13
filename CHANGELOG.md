@@ -33,6 +33,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   from phoenix. The plugin source stays here pending a decision to delete it.
 
 ### Fixed
+- `replicator` (v0.9.4): bare skill names no longer shadow (or duplicate) their
+  plugin-qualified gene. Both harnesses record some activations by bare skill
+  name — omp as a `skill://<name>` read, Claude Code as `"skill":"<name>"` — and
+  `resolveGeneKey` returned any pre-existing bare gene unchanged, so a bare key
+  created before its qualified twin was seeded absorbed every later invocation
+  while the twin sat at zero (the whole `printing-press*` family,
+  `simple-english`, `update-config`, `claude-api`, `docker-maintenance`,
+  `artifact-design`). Resolution is now: qualified key → unique `:name` suffix
+  match → the single candidate whose plugin is actually installed in the
+  running harness → bare. The installed set comes from omp's
+  `installed_plugins.json`, which is what separates
+  `sandbox-manager:check-todos` from `taches-cc-resources:check-todos` (the
+  latter is a pre-omp leftover nothing runs). The 12 affected bare genes were
+  merged into their twins with per-date counts summed (837 invocations before
+  and after; ledger 210 → 198 genes); `graphify` stays bare because it is a
+  personal non-plugin skill with no qualified form.
 - `journal` (v0.1.4): the `update-journal` skill resolved the extractor path
   against the Claude Code plugin-cache layout
   (`plugins/cache/plugins/<marketplace>___<plugin>___<version>/`) instead of

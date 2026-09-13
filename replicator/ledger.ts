@@ -75,17 +75,36 @@ export function registerGene(
   return { ...ledger, genes: { ...ledger.genes, [key]: gene } }
 }
 
-// A parsed invocation key is normally already plugin-qualified (`plugin:skill`)
-// or an existing gene. omp records skill activation as a bare `skill://<name>`
-// read with no plugin namespace, so a bare name must be resolved to its
-// plugin-qualified gene — otherwise every cycle would register a spurious
-// unqualified gene alongside the real one. Resolution is a unique suffix match
-// against existing genes; unresolved or ambiguous names stay bare (registered
-// as-is) so a skill is never silently attributed to the wrong plugin.
-export function resolveGeneKey(ledger: Ledger, raw: string): string {
-  if (raw.includes(':') || ledger.genes[raw]) return raw
+// A parsed invocation key is normally already plugin-qualified (`plugin:skill`).
+// Both harnesses also record some activations by bare skill name: omp reads
+// `skill://<name>`, and Claude Code's Skill tool takes `"skill":"<name>"`, with
+// no plugin namespace either time. A bare name is therefore resolved against
+// the ledger's qualified genes — otherwise every cycle registers a spurious
+// unqualified gene alongside the real one.
+//
+// Resolution order:
+//   1. an already-qualified raw key passes through;
+//   2. a unique `:name` suffix match wins;
+//   3. with `installedPlugins` supplied, the single candidate whose plugin is
+//      actually installed here wins — this is what separates
+//      `sandbox-manager:check-todos` from `taches-cc-resources:check-todos`,
+//      where only the first plugin exists in this sandbox;
+//   4. otherwise the bare name is kept and registered as-is, so a skill is
+//      never silently attributed to the wrong plugin.
+//
+// Note that an existing bare gene does not short-circuit: a bare key created
+// before its qualified twin was seeded (the whole `printing-press*` family,
+// `simple-english`, `update-config`, `claude-api`, `docker-maintenance`,
+// `artifact-design`) would otherwise absorb every later activation forever
+// while the twin sat at zero. Rule 4 still lands on the bare key when there is
+// genuinely no qualified candidate (personal non-plugin skills, e.g.
+// `graphify`).
+export function resolveGeneKey(ledger: Ledger, raw: string, installedPlugins: ReadonlySet<string> = new Set()): string {
+  if (raw.includes(':')) return raw
   const matches = Object.keys(ledger.genes).filter((k) => k.endsWith(`:${raw}`))
-  return matches.length === 1 ? matches[0] : raw
+  if (matches.length === 1) return matches[0]
+  const installed = matches.filter((k) => installedPlugins.has(k.slice(0, k.indexOf(':'))))
+  return installed.length === 1 ? installed[0] : raw
 }
 
 export function recordInvocation(ledger: Ledger, key: string, dateISO: string, count: number): Ledger {

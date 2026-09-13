@@ -209,13 +209,36 @@ describe('resolveGeneKey', () => {
     expect(resolveGeneKey(l, 'update-journal')).toBe('journal:update-journal')
   })
 
+  test('an existing bare gene does not shadow its qualified twin', () => {
+    const l = seed(['simple-english', 'simple-english:simple-english'])
+    expect(resolveGeneKey(l, 'simple-english')).toBe('simple-english:simple-english')
+  })
+
   test('leaves an ambiguous bare name bare rather than guessing', () => {
     const l = seed(['taches-cc-resources:add-to-todos', 'sandbox-manager:add-to-todos'])
     expect(resolveGeneKey(l, 'add-to-todos')).toBe('add-to-todos')
   })
 
+  test('an ambiguous bare name resolves to its only installed candidate', () => {
+    const l = seed(['taches-cc-resources:add-to-todos', 'sandbox-manager:add-to-todos'])
+    const installed = new Set(['sandbox-manager', 'telegram-ng'])
+    expect(resolveGeneKey(l, 'add-to-todos', installed)).toBe('sandbox-manager:add-to-todos')
+  })
+
+  test('an ambiguous bare name stays bare when both candidates are installed', () => {
+    const l = seed(['taches-cc-resources:add-to-todos', 'sandbox-manager:add-to-todos'])
+    const installed = new Set(['sandbox-manager', 'taches-cc-resources'])
+    expect(resolveGeneKey(l, 'add-to-todos', installed)).toBe('add-to-todos')
+  })
+
+  test('the installed hint does not override a unique match', () => {
+    const l = seed(['printing-press:printing-press'])
+    expect(resolveGeneKey(l, 'printing-press', new Set(['sandbox-manager']))).toBe('printing-press:printing-press')
+  })
+
   test('leaves an unresolved bare name bare', () => {
     const l = seed(['sandbox-manager:restart-session'])
     expect(resolveGeneKey(l, 'no-such-skill')).toBe('no-such-skill')
+    expect(resolveGeneKey(l, 'no-such-skill', new Set(['sandbox-manager']))).toBe('no-such-skill')
   })
 })

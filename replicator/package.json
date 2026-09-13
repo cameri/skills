@@ -1,6 +1,6 @@
 {
   "name": "replicator",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "license": "Apache-2.0",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
