@@ -28,7 +28,6 @@ Monorepo of Claude Code plugins and slash commands by Ricardo Arturo Cabral Mej�
 | [journal](./journal/) | Keeps a series of narrative journals about what you've been doing, written from Claude's own perspective, by reading session history and memory | Claude |
 | [knowledge-wiki](./knowledge-wiki/) | Maintains a self-updating, cross-linked markdown knowledge base — ingests durable facts and research as topic pages instead of re-deriving them each time, with query and link-consistency checks | Claude |
 | [lightning](./lightning/) | Bitcoin Lightning payment tools (parse/pay invoices, balances, transactions) via the official Alby MCP server over Nostr Wallet Connect | Claude |
-| [nats](./nats/) | Connect Claude Code agents over NATS — message, ping, and discover other agents point-to-point | Claude + Cursor |
 | [netshoot](./netshoot/) | Network troubleshooting inside Docker container networks using nicolaka/netshoot | Claude |
 | [nostr](./nostr/) | Nostr channel for Claude Code — decentralized messaging over Nostr relays with DM pairing, allowlists, relay pool management, and NIP-04 encrypted DMs | Claude |
 | [paperless](./paperless/) | Upload documents to and search a Paperless-ngx instance via its REST API | Claude + Cursor |
@@ -38,7 +37,6 @@ Monorepo of Claude Code plugins and slash commands by Ricardo Arturo Cabral Mej�
 | [sandbox-manager](./sandbox-manager/) | Manage the Claude Code sandbox itself — restart sessions, manage its own plugins/marketplaces, run post-restart health checks, and set up herdr for remote SSH attach | Claude |
 | [simple-english](./simple-english/) | Write or rewrite technical text with the rules of ASD-STE100 Simplified Technical English so it is clear, unambiguous, and free of AI slop | Claude |
 | [technitium-dns](./technitium-dns/) | Manage a self-hosted Technitium DNS Server — zones, records, stats, and cache | Claude + Cursor |
-| [telegram](./telegram/) | Telegram channel for Claude Code — messaging bridge with built-in access control, pairing, and full Bot API coverage including voice note transcription | Claude |
 | [telegram-ng](./telegram-ng/) | Telegram channel for Claude Code — messaging bridge with built-in access control. Fork of Anthropic's official telegram plugin for local development | Claude |
 | [wallabag](./wallabag/) | Save, search, and manage read-it-later articles via your Wallabag instance | Claude + Cursor |
 | [webhooks](./webhooks/) | Receive webhook events from external systems as channel notifications — HMAC-SHA256, IP allowlisting, BullMQ processing | Claude |
@@ -159,16 +157,6 @@ Monorepo of Claude Code plugins and slash commands by Ricardo Arturo Cabral Mej�
 | Skill | Description |
 |---|---|
 | `doubt-driven-development:doubt-driven-development` | Adversarial fresh-context review of a non-trivial in-flight decision — CLAIM, EXTRACT, DOUBT, RECONCILE, STOP — with optional user-authorized cross-model escalation |
-
-### nats
-
-| Skill | Description |
-|---|---|
-| `/nats:access` | Configure the NATS server URL and this agent's display name |
-| `/nats:show-nats-status` | Show connection info, display name, and all discovered agents |
-| `/nats:discover-agents` | Broadcast "who's there?" and list all discovered agents |
-| `/nats:ping-agent` | Liveness check against one known agent, reports round-trip time |
-| `/nats:send-message` | Send a free-form message directly to another agent |
 
 ### paperless
 
@@ -293,17 +281,9 @@ Monorepo of Claude Code plugins and slash commands by Ricardo Arturo Cabral Mej�
 | `/nostr:bech32` | Encode/decode NIP-19 bech32 entities (note1, npub1, nevent1, etc.) |
 | `/nostr:mine-pubkey` | Mine a vanity or proof-of-work Nostr keypair with rana |
 
-### telegram
-
-| Skill | Description |
-|---|---|
-| `telegram:telegram` | Handle inbound Telegram messages, send replies, react, edit messages, download attachments, process voice notes |
-| `/telegram:configure` | Save the bot token and review access policy |
-| `/telegram:access` | Manage Telegram channel access — pairings, allowlists, DM/group policy |
-
 ### telegram-ng
 
-Fork of Anthropic's official `telegram` plugin — see [telegram-ng/README.md](./telegram-ng/README.md). This is the live channel driver for this workspace; `telegram` above is the unforked predecessor, kept in the repo for reference/other users.
+
 
 | Skill | Description |
 |---|---|
@@ -405,7 +385,6 @@ Run this once inside any Claude Code session:
 /plugin install anydoc@cameri-skills
 /plugin install elevenlabs@cameri-skills
 /plugin install github-manager@cameri-skills
-/plugin install nats@cameri-skills
 /plugin install paperless@cameri-skills
 /plugin install cronjobs@cameri-skills
 /plugin install technitium-dns@cameri-skills
@@ -424,7 +403,7 @@ After reloading, all plugin skills are available (e.g. `/paperless:configure`, `
 
 Cursor reads the same `SKILL.md` format as Claude Code (frontmatter `name`/`description`, discovered from `.cursor/skills/<name>/SKILL.md`) and the same `.mcp.json` shape (`{"mcpServers": {...}}`, read from `~/.cursor/mcp.json`). No plugin content needs to change for Cursor — only how it's discovered.
 
-The 13 plugins marked "Claude + Cursor" in the table above (`paperless`, `actual-budget`, `technitium-dns`, `home-assistant`, `wallabag`, `elevenlabs`, `nats`, `container-management`, `finance-manager`, `audiobookshelf`, `anydoc`, `agent-resources`, `consider`) work under Cursor. Channel plugins (`telegram`, `telegram-ng`, `nostr`, `webhooks`, `cronjobs`, `sandbox-manager`) stay Claude-only — they react to inbound background messages, which has no Cursor equivalent since Cursor is an interactive editor, not a background message host. `netshoot` also stays Claude-only for now.
+The 12 plugins marked "Claude + Cursor" in the table above (`paperless`, `actual-budget`, `technitium-dns`, `home-assistant`, `wallabag`, `elevenlabs`, `container-management`, `finance-manager`, `audiobookshelf`, `anydoc`, `agent-resources`, `consider`) work under Cursor. Channel plugins (`telegram-ng`, `nostr`, `webhooks`, `cronjobs`, `sandbox-manager`) stay Claude-only — they react to inbound background messages, which has no Cursor equivalent since Cursor is an interactive editor, not a background message host. `netshoot` also stays Claude-only for now.
 
 ### 1. Symlink each skill directory
 
@@ -437,18 +416,18 @@ for skill_dir in ~/Workspace/skills/paperless/skills/*/; do
 done
 ```
 
-Repeat for each of the 9 Cursor-eligible plugins, substituting the plugin name in both the source path and the `~/.cursor/skills/` prefix.
+Repeat for each of the 12 Cursor-eligible plugins, substituting the plugin name in both the source path and the `~/.cursor/skills/` prefix.
 
 ### 2. Register MCP servers (only plugins with one)
 
-Most of the 9 Cursor-eligible plugins are skill-only (the `SKILL.md` drives `curl`/API calls directly) and need no MCP server entry — Step 1 alone is enough. `nats` is the exception: it ships a real MCP server (`nats/.mcp.json`). Paste its contents into `~/.cursor/mcp.json`, replacing `${CLAUDE_PLUGIN_ROOT}` (a Claude Code–only variable Cursor doesn't expand) with the plugin's absolute path:
+Every Cursor-eligible plugin is skill-only today (the `SKILL.md` drives `curl`/API calls directly), so no MCP server entry is needed — Step 1 alone is enough. For a plugin that does ship one, paste its `.mcp.json`'s `mcpServers` object into `~/.cursor/mcp.json`, replacing `${CLAUDE_PLUGIN_ROOT}` (a Claude Code–only variable Cursor doesn't expand) with the plugin's absolute path:
 
 ```json
 {
   "mcpServers": {
-    "nats": {
+    "<server-name>": {
       "command": "bun",
-      "args": ["run", "--cwd", "/absolute/path/to/skills/nats", "--shell=bun", "--silent", "start"]
+      "args": ["run", "--cwd", "/absolute/path/to/skills/<plugin>", "--shell=bun", "--silent", "start"]
     }
   }
 }

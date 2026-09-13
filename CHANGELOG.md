@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- **`nats` and `telegram` plugins deleted** (2026-09-13). Both are superseded and
+  no longer installed on any host: `nats` by the `flock` plugin
+  (`pi-extensions`), which folded the per-agent comms into the mesh and is
+  what flock members actually install; `telegram` by `telegram-ng`, the fork
+  that has been the live channel driver since it landed. Removing them from
+  the marketplace makes them uninstallable here (existing installs keep
+  working from cache); no plugin or config in this workspace referenced
+  either one.
+
+
 ### Added
 - **`brain` (v0.4.4)**: the MCP server now serves one LatticeDB to many agent
   sessions. The first process to start becomes the primary — it opens the
