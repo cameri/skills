@@ -30,6 +30,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   working from cache); no plugin or config in this workspace referenced
   either one.
 
+### Changed
+- **`telegram-ng` 0.13.2 — how to offer a bot command** (2026-09-13). Two rules
+  the user asked for after a reply offered its follow-up actions as backticked
+  code spans: never wrap an offered command in backticks or any other markup —
+  Telegram stops detecting the tappable command link and the user is left with a
+  copy-only string to paste back by hand — and name it as the job to be done,
+  verb first (`/trim_image`, not `/image_trim`), rather than describing the
+  action. Both now sit in the MCP server's `instructions`, so every session
+  inherits them.
 
 ### Added
 - **`brain` (v0.4.4)**: the MCP server now serves one LatticeDB to many agent
