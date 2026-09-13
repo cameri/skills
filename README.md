@@ -8,7 +8,7 @@ Monorepo of Claude Code plugins and slash commands by Ricardo Arturo Cabral Mej�
 |---|---|---|
 | [ablate-ai-layer](./ablate-ai-layer/) | Measure whether a repository's AI instructions still earn their place — runs the same real task with the layer intact and stripped, in throwaway git worktrees, then grades every rule against what actually changed | Claude + Cursor |
 | [actual-budget](./actual-budget/) | Interact with your self-hosted Actual Budget instance — check balances, add transactions, and query budgets | Claude + Cursor |
-| [agent-resources](./agent-resources/) | Build and audit Claude Code skills, hooks, MCP servers, and subagents | Claude + Cursor |
+| [agent-resources](./agent-resources/) | Build and audit Claude Code skills, hooks, MCP servers, subagents, and omp/Pi extensions | Claude + Cursor |
 | [anydoc](./anydoc/) | Convert Word, PowerPoint, Excel, OpenDocument, RTF, EPUB, CSV, and PDF files to clean GitHub-Flavored Markdown via the anydoc CLI | Claude + Cursor |
 | [audiobookshelf](./audiobookshelf/) | Interact with a self-hosted Audiobookshelf instance — list libraries, browse and search library items, and check listening progress | Claude + Cursor |
 | [autoresearch](./autoresearch/) | Autonomously optimize Claude Code skills using Karpathy's autoresearch methodology — binary evals, prompt mutation, and iterative improvement loops | Claude |
@@ -58,10 +58,12 @@ Monorepo of Claude Code plugins and slash commands by Ricardo Arturo Cabral Mej�
 
 | Skill | Description |
 |---|---|
+| `/agent-resources:create-agent-extensions` | Expert guidance for building omp/Pi extensions — module contract, event and registration surfaces, delivery/wake semantics, hazards, testing, and packaging |
 | `/agent-resources:create-agent-skills` | Expert guidance for creating, writing, building, and refining Claude Code Skills |
 | `/agent-resources:create-hooks` | Create Claude Code hooks (PreToolUse, PostToolUse, Stop, SessionStart, UserPromptSubmit) |
 | `/agent-resources:create-mcp-servers` | Expert guidance for building MCP servers for Claude integrations (Python/TypeScript) |
 | `/agent-resources:create-subagents` | Expert guidance for creating, building, and using Claude Code subagents |
+| `/agent-resources:audit-extension` | Audit an extension module for contract correctness, event-handler behaviour, hazards, test coverage, and packaging rules |
 | `/agent-resources:audit-skill` | Audit a SKILL.md file for YAML compliance, pure XML structure, progressive disclosure, and best practices |
 | `/agent-resources:audit-subagent` | Audit a subagent configuration file for role definition, prompt quality, and tool selection |
 | `/agent-resources:heal-skill` | Apply corrections to a skill's SKILL.md based on mistakes discovered during execution, with approval workflow |

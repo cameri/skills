@@ -50,7 +50,7 @@
     },
     {
       "name": "agent-resources",
-      "description": "Build and audit Claude Code skills, hooks, MCP servers, and subagents \u2014 the toolkit for extending Claude Code itself.",
+      "description": "Build and audit Claude Code skills, hooks, MCP servers, subagents, and omp/Pi extensions \u2014 the toolkit for extending the agent itself.",
       "tools": [
         "claude",
         "cursor"

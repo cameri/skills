@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`agent-resources` 0.3.0 — extension authoring** (2026-09-13).
+  `create-agent-extensions` teaches building omp/Pi extension modules: the module
+  contract and the `omp.extensions` declaration, the event surface with its
+  fail-closed rules, registration (tools, commands, shortcuts, providers,
+  renderers), the delivery semantics that decide whether a push wakes an idle
+  session, the hazards of running unsandboxed in-process, the two-tier testing
+  pattern, and the packaging rules. It ships
+  `references/patterns/channel-bridge.ts` — the generalized version of the bridge
+  five plugins currently copy-paste verbatim, verified byte-identical to the
+  shipped module on a stub harness. The companion `audit-extension` skill and an
+  `extension-auditor` subagent review an existing extension against the same bar.
+
 ### Removed
 - **`nats` and `telegram` plugins deleted** (2026-09-13). Both are superseded and
   no longer installed on any host: `nats` by the `flock` plugin
