@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **`brain` (v0.4.4)**: the MCP server now serves one LatticeDB to many agent
+  sessions. The first process to start becomes the primary — it opens the
+  database, serves the tools over stdio *and* over a Unix socket
+  (`brain/brain.sock`, its PID in `brain/brain.pid`); a session that starts
+  later finds that PID alive and becomes a proxy that forwards the MCP byte
+  stream to the socket without opening the database. Election is retried (5 ×
+  500 ms) so simultaneous starts still settle on one primary, and stale
+  socket/PID files are cleared by the next primary. A fresh `Server` is built
+  per socket connection: the SDK allows one transport per instance, so a shared
+  socket `Server` would answer the first client and hang every other. Transport
+  contributed by tauceti; merged onto 0.4.3 preserving the richer tool schemas,
+  `forget`'s `permanent` flag and edge target (`sourceGid`/`targetGid`/
+  `edgeType`), and the `resolveProjectDir()` fallback chain. New regression test
+  `src/mcp-smoke.test.ts` runs three real sessions against one project root.
 - **`sandbox-manager` (v0.19.0)**: new `herdr-remote-ssh` skill plus
   `scripts/setup-herdr-sshd.sh` (idempotent sshd bootstrap) and
   `scripts/check-herdr-remote.sh` (readiness and failure-mode diagnostics),

@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, statSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, statSync, rmSync, existsSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -122,6 +122,61 @@ test("brain MCP server: learn_from then recall over a real stdio connection", as
     expect(JSON.parse(registryText)).toEqual({ rows: [{ path: projectDir, duration: "12" }] });
   } finally {
     await client.close();
+    rmSync(projectDir, { recursive: true, force: true });
+  }
+}, 30_000);
+
+// Sessions on one machine each launch their own brain MCP process, but only
+// one may hold the database. The first process to start becomes the primary
+// (stdio plus a Unix socket); every later one has to proxy to it over that
+// socket rather than open the same LatticeDB a second time. This is the
+// regression test for that election — and for the SDK's one-transport-per-
+// Server rule, which a shared socket Server instance would violate: the second
+// and third clients would then connect and never be answered.
+test("brain MCP server: later sessions proxy to the first one's socket", async () => {
+  const projectDir = mkdtempSync(join(tmpdir(), "brain-mcp-proxy-"));
+  mkdirSync(join(projectDir, "graphify-out"), { recursive: true });
+  writeFileSync(join(projectDir, "graphify-out", "graph.json"), JSON.stringify(FIXTURE));
+  const env = { ...process.env, CLAUDE_PROJECT_DIR: projectDir };
+
+  const spawnClient = async () => {
+    const transport = new StdioClientTransport({
+      command: "bun",
+      args: [join(import.meta.dir, "..", "server.ts")],
+      env,
+    });
+    const client = new Client({ name: "brain-proxy-smoke-test", version: "0.0.0" }, { capabilities: {} });
+    await client.connect(transport);
+    return client;
+  };
+
+  const primary = await spawnClient();
+  const later: Client[] = [];
+  try {
+    // The primary takes ownership: its PID file is written before it starts
+    // listening, which is what the later sessions elect on.
+    expect(existsSync(join(projectDir, "brain", "brain.pid"))).toBe(true);
+
+    later.push(await spawnClient(), await spawnClient());
+
+    // All three answer over the real protocol, in both directions.
+    const learned = await primary.callTool({ name: "learn_from", arguments: {} });
+    expect(JSON.parse((learned.content as Array<{ text: string }>)[0]!.text)).toMatchObject({ nodesCreated: 1 });
+
+    const remembered = await later[0]!.callTool({
+      name: "remember",
+      arguments: { text: "written through a proxy" },
+    });
+    const gid = JSON.parse((remembered.content as Array<{ text: string }>)[0]!.text).gid as string;
+
+    for (const client of later) {
+      // Same database, whichever process the session landed on.
+      const seen = await client.callTool({ name: "recall", arguments: { query: "MATCH (n:Fact) RETURN n.gid" } });
+      const rows = JSON.parse((seen.content as Array<{ text: string }>)[0]!.text).rows as Array<{ "n.gid": string }>;
+      expect(rows.map((r) => r["n.gid"])).toContain(gid);
+    }
+  } finally {
+    for (const client of [primary, ...later]) await client.close();
     rmSync(projectDir, { recursive: true, force: true });
   }
 }, 30_000);

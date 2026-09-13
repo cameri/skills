@@ -34,3 +34,21 @@ than reimplementing staleness detection, and estimates token cost by
 extrapolating from that path's `graphify-out/cost.json` history. A re-study
 still goes through `/graphify --update` (or a fresh `/graphify` run) followed
 by `learn_from` — brain never dispatches extraction itself.
+
+## Concurrency
+
+Every session that loads this plugin launches its own `server.ts` over stdio,
+but LatticeDB takes one writer. The first process to start becomes the
+**primary**: it opens the database, serves the tools over stdio, and listens on
+a Unix socket at `brain/brain.sock` beside the graph, recording its PID in
+`brain/brain.pid`. A session that starts later finds that PID alive and becomes
+a **proxy** — it opens no database of its own and forwards the MCP byte stream
+between its own stdin/stdout and the primary's socket. Both roles serve the
+same tools from the same handlers.
+
+Election is retried for a few seconds, so two sessions starting at once still
+settle on a single primary. The socket and PID file need no manual cleanup: a
+stale pair is removed by whichever process becomes the next primary. A proxy
+exits with its primary — MCP sessions are negotiated per connection, so it
+cannot re-attach to a replacement — and its client then sees the brain server
+go away until the session restarts it.
