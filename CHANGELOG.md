@@ -26,31 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   longer reproduces the plain-text form.
 
 ### Added
-- **`routines` 0.1.0 — the `cronjobs` successor** (2026-09-14).
-  A new plugin, installed alongside `cronjobs` rather than replacing it in place;
-  the old one stays enabled until the cutover is approved. Same shape as its
-  predecessor — a natural-language scheduler that fires channel notifications
-  (`/routines:routine`; tools `add-job`/`list-jobs`/`remove-job`/`clear-jobs`/
-  `get-config`/`set-config`) — with four defects fixed rather than ported:
-  the job store is written atomically (temp file → `fsync` → `rename` →
-  directory `fsync`) instead of `writeFileSync` of the whole file, so a crash
-  mid-write can no longer truncate every job; a malformed store raises instead of
-  reading as `[]` — which is what let the next write destroy a truncated file —
-  and the tools surface the path and refuse to mutate; the `/tmp` pid lock that
-  made a second instance `exit(1)`, leaving every later session without tools
-  after an orphaned child, is replaced by a state-dir lease with heartbeat,
-  stale/dead-holder recovery and pid-reuse detection, under which a follower
-  serves every tool and only loses scheduling; and a fire missed while the host
-  was down is caught up when it fell inside a 30-minute grace window, with
-  anything older logged and a spent one-shot pruned, where the predecessor
-  skipped a past-due `once` job forever and never pruned it. Also: `config.json`
-  is the timezone source of truth (the predecessor resolved local time while its
-  README said UTC), the child shuts down on stdin EOF/SIGTERM/SIGINT instead of
-  orphaning, the extension mirrors omp's plugin settings into `config.json`
-  writing only the keys actually set (profiles share that file), and on first
-  boot the legacy `~/.claude/channels/cronjobs/jobs.json` is copied to
-  `~/.claude/channels/routines/jobs.json` with ids preserved, leaving the legacy
-  file untouched. 66 tests; no network or host package needed.
 - **`agent-resources` 0.3.0 — extension authoring** (2026-09-13).
   `create-agent-extensions` teaches building omp/Pi extension modules: the module
   contract and the `omp.extensions` declaration, the event surface with its
