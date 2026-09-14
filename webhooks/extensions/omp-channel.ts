@@ -9,14 +9,27 @@
  * same marker shape Claude Code uses, so the session's channel rules and
  * prompt-injection guard apply identically in both hosts.
  *
- * Wakes are content-bearing (the message text is the prompt), matching the
- * Claude path and @agent-ops/pi-nats-channel. The wake uses a bare
- * `pi.sendUserMessage(wrapped)` call: omp only starts a turn for the
- * no-options form (prompt() when idle, steer while streaming) — an explicit
- * `deliverAs: "followUp"` merely queues the message and never wakes an idle
- * session.
+ * The wake is content-bearing (the message text is the prompt) and is sent as
+ * a `channel:incoming` custom message with `{triggerTurn: true}` — the shape
+ * flock's bridge uses, which omp renders as the inbound-channel card (source,
+ * from, timestamp) instead of anonymous user text. `triggerTurn` is what
+ * starts the turn: a custom message without it is stored but never wakes an
+ * idle session.
  *
  */
+
+/**
+ * Namespace import: some omp builds (observed 18.1.14/18.1.17) resolve this
+ * module without the named export, which fails the whole extension load and
+ * silently breaks wake. The wire value is stable across versions
+ * ("channel:incoming" — omp's message customType), so fall back to the
+ * literal when the bundled module does not carry the constant.
+ */
+import * as piPkg from "@oh-my-pi/pi-coding-agent";
+
+const CHANNEL_INCOMING_MESSAGE_TYPE: string =
+  ((piPkg as Record<string, unknown>).CHANNEL_INCOMING_MESSAGE_TYPE as string | undefined) ??
+  "channel:incoming";
 
 import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
 
@@ -66,7 +79,15 @@ export default function ompChannelBridge(pi: ExtensionAPI): void {
     const safeContent = params.content.replaceAll("</channel", "<\\/channel");
     const wrapped = `<channel ${attrs.join(" ")}>\n${safeContent}\n</channel>`;
     try {
-      pi.sendUserMessage(wrapped);
+      pi.sendMessage(
+        {
+          customType: CHANNEL_INCOMING_MESSAGE_TYPE,
+          content: wrapped,
+          display: true,
+          details: { ...meta, text: params.content },
+        },
+        { triggerTurn: true },
+      );
     } catch (error: unknown) {
       process.stderr.write(
         `omp channel bridge: wake failed: ${error instanceof Error ? error.message : String(error)}\n`,

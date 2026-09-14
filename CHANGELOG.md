@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Channel pushes render as cards instead of anonymous user text** (2026-09-14).
+  `telegram-ng` 0.13.3, `cronjobs` 0.1.8, `webhooks` 0.2.5, `agent-resources` 0.3.1.
+  An inbound Telegram message, cron fire or webhook woke the session but arrived
+  as plain user text: the omp fork's inbound-channel card renders only
+  `channel:incoming` custom messages, while these three bridges woke with
+  `pi.sendUserMessage`, which the host shows as an ordinary prompt. They now send
+  `pi.sendMessage({ customType: "channel:incoming", content, display: true, details: { ...meta, text } }, { triggerTurn: true })`
+  — the shape `flock` already used, which is why flock dispatches always rendered
+  with a card. The sender metadata now survives into the message `details`, and
+  the wake still triggers a turn. The named `CHANNEL_INCOMING_MESSAGE_TYPE`
+  export is read through a namespace import with a literal fallback, because
+  builds 18.1.14/18.1.17 do not expose it and a failed import breaks the whole
+  wake silently. `create-agent-extensions`' reference bridge,
+  `patterns/channel-bridge.md`, `delivery-and-wake.md` and the SKILL.md success
+  criteria were updated to the same shape, so a plugin built from the skill no
+  longer reproduces the plain-text form.
+
 ### Added
 - **`agent-resources` 0.3.0 — extension authoring** (2026-09-13).
   `create-agent-extensions` teaches building omp/Pi extension modules: the module

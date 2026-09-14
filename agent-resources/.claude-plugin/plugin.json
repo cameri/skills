@@ -1,7 +1,7 @@
 {
   "name": "agent-resources",
   "description": "Build and audit Claude Code skills, hooks, MCP servers, subagents, and omp/Pi extensions \u2014 the toolkit for extending the agent itself.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "keywords": [
     "skills",
     "hooks",

@@ -16,11 +16,31 @@
  * synthetic server name.
  *
  * The wake is content-bearing (the message text is the prompt), matching the
- * Claude path. It uses a bare `pi.sendUserMessage(wrapped)` call: omp only
- * starts a turn for the no-options form (prompt when idle, steer while
- * streaming) — an explicit `deliverAs: "followUp"` merely queues the message
- * and never wakes an idle session. See `delivery-and-wake.md`.
+ * Claude path, and is sent as a `customType: "channel:incoming"` message with
+ * `{ triggerTurn: true }` — the shape omp renders as the inbound-channel card
+ * (source, from, timestamp) instead of anonymous user text. A bare
+ * `pi.sendUserMessage(wrapped)` still wakes the session, but the message then
+ * arrives as ordinary user text with no card. `triggerTurn` is what starts the
+ * turn: a custom message without it is stored but never wakes an idle session,
+ * and `deliverAs: "followUp"` merely queues. See `delivery-and-wake.md`.
+ *
+ * The flip side: under a stock omp build the `channel:incoming` message is
+ * still delivered and still renders (as a generic custom message), so the wake
+ * does not depend on the card renderer being present.
  */
+
+/**
+ * Namespace import with a literal fallback: some omp builds (observed
+ * 18.1.14/18.1.17) resolve this module without the named export, and a failed
+ * extension load silently breaks the wake for that channel. The wire value is
+ * stable across versions, so fall back to it when the module lacks the
+ * constant.
+ */
+import * as piPkg from "@oh-my-pi/pi-coding-agent";
+
+const CHANNEL_INCOMING_MESSAGE_TYPE: string =
+  ((piPkg as Record<string, unknown>).CHANNEL_INCOMING_MESSAGE_TYPE as string | undefined) ??
+  "channel:incoming";
 
 import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
 
@@ -97,7 +117,15 @@ export function createChannelBridge(config: ChannelBridgeConfig): (pi: Extension
       const wrapped = `<channel ${attrs.join(" ")}>\n${safeContent}\n</channel>`;
 
       try {
-        pi.sendUserMessage(wrapped);
+        pi.sendMessage(
+          {
+            customType: CHANNEL_INCOMING_MESSAGE_TYPE,
+            content: wrapped,
+            display: true,
+            details: { ...meta, text: params.content },
+          },
+          { triggerTurn: true },
+        );
       } catch (error: unknown) {
         // Losing one wake must not take down the notification dispatch path
         // for the other extensions subscribed to this event.

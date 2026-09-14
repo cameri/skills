@@ -41,13 +41,14 @@ pi.sendUserMessage("Build finished — please summarise the failures.");
 
 `mcp_notification` is an observation event. Nothing in the harness turns a received notification into a user turn — that is the receiving extension's job, and the mechanism is a **bare `pi.sendUserMessage(wrapped)`** with no options, or `pi.sendMessage(message, { triggerTurn: true })`.
 
-Concretely, the five channel bridges shipped in this marketplace each end with:
+Concretely, the channel bridges shipped in this marketplace end with one of these two calls:
 
 ```ts
 pi.sendUserMessage(wrapped); // no options: prompts when idle, steers while streaming
+pi.sendMessage(card, { triggerTurn: true }); // typed message that also starts a turn
 ```
 
-The comment they carry is the rule: *omp only starts a turn for the no-options form (prompt() when idle, steer while streaming) — an explicit `deliverAs: "followUp"` merely queues the message and never wakes an idle session.*
+Both wake an idle session. They differ in what arrives: the bare prompt lands as ordinary user text, the typed message keeps its sender metadata (`details`) and renders through the host's channel renderer as a card. **Prefer the typed form for a channel plugin** — see `patterns/channel-bridge.md`. The rule the bridges share: *omp only starts a turn for the no-options form, or for a `sendMessage` carrying `triggerTurn: true` — an explicit `deliverAs: "followUp"` merely queues the message and never wakes an idle session.*
 
 Practical consequences:
 

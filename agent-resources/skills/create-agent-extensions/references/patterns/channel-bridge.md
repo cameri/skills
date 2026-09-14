@@ -21,7 +21,7 @@ Five channel plugins shipped alongside this skill carried a byte-identical copy 
 5. Accepts the notification when it comes from the configured server name **or** carries the configured source name in its meta.
 6. Builds a `<channel …>` marker: `source` first, then every other string-valued meta entry as an escaped attribute.
 7. Breaks a forged close tag inside the sender-controlled content.
-8. Sends the result with a bare `pi.sendUserMessage(wrapped)` — the wake.
+8. Sends the result as a `customType: "channel:incoming"` message with `{ triggerTurn: true }` — the wake, and the shape omp renders as the inbound-channel card.
 
 </what_it_does>
 
@@ -38,7 +38,7 @@ Each guard exists for a specific failure; do not drop one while adapting the fil
 | `escapeAttribute` on every key and value | Meta keys and values are server- or sender-controlled. Unescaped, a crafted value closes the attribute and injects another |
 | `source` skipped in the meta loop | `source` is written explicitly first; copying it again would produce a duplicate attribute |
 | `content.replaceAll("</channel", "<\\/channel")` | The content is sender-controlled text. A literal `</channel>` would close the marker early and let the rest of the message pose as session-level structure — attributes, a second channel marker, or an instruction outside the channel envelope |
-| `try/catch` around `sendUserMessage` | A failure to wake one channel must not break notification dispatch for every other extension subscribed to `mcp_notification` |
+| `try/catch` around `sendMessage` | A failure to wake one channel must not break notification dispatch for every other extension subscribed to `mcp_notification` |
 
 </the_guards>
 
@@ -50,16 +50,9 @@ Each guard exists for a specific failure; do not drop one while adapting the fil
 4. Restart the session. `/reload-plugins` does not rebuild extension modules.
 5. Add the stub-driven test (`references/testing.md`): one wake, one subagent silence, one escaping case, one non-matching server.
 
-**Variant — a rendered channel card.** An extension can instead send a custom message rather than a user prompt:
+**Why the card form, not `sendUserMessage`.** Both wake an idle session, but they deliver different messages: `pi.sendUserMessage(wrapped)` arrives as ordinary user text — the `<channel …>` marker is the only trace of where it came from — while the custom message above arrives typed, with `details` carrying the sender metadata, and renders through the host's channel renderer as a card (source, from, timestamp). omp's stock renderer draws the marker text; a host with the channel-card patch draws the card. Since the wake is identical either way and the card is a strict superset in information, prefer the custom message. `triggerTurn: true` is what starts the turn — a custom message without it is stored but never wakes an idle session, and `deliverAs: "followUp"` only queues.
 
-```ts
-pi.sendMessage(
-  { customType: "channel:incoming", content: wrapped, display: true, details: { ...meta, text: params.content } },
-  { triggerTurn: true },
-);
-```
-
-This renders through the host's channel message renderer and still wakes an idle session, because `triggerTurn: true` does what the omitted options do for `sendUserMessage`. Note the wire value `channel:incoming`: some omp builds do not export the named `CHANNEL_INCOMING_MESSAGE_TYPE` constant, so the one place this pattern uses a runtime import of the harness package is to read that constant with a literal fallback. Treat it as the exception, not the norm — every other module imports the harness type-only.
+Note the wire value `channel:incoming`: some omp builds do not export the named `CHANNEL_INCOMING_MESSAGE_TYPE` constant, so the one place this pattern uses a runtime import of the harness package is to read that constant with a literal fallback. Treat it as the exception, not the norm — every other module imports the harness type-only.
 
 </adapting_it>
 

@@ -136,7 +136,7 @@ Always read `references/extension-model.md` first — the module contract and di
 | `references/registration-surface.md` | `registerTool` / `registerCommand` / `registerShortcut` / `registerFlag` / `registerProvider` / renderers / `appendEntry`, and what a command context can do |
 | `references/delivery-and-wake.md` | `sendMessage` vs `sendUserMessage`, `deliverAs` semantics, and the rule for waking an idle session |
 | `references/patterns/channel-bridge.md` | Why the channel bridge exists, the guards it preserves, and how to adapt it |
-| `references/patterns/channel-bridge.ts` | The reusable bridge module: MCP channel notification → `<channel …>` wake |
+| `references/patterns/channel-bridge.ts` | The reusable bridge module: MCP channel notification → `<channel …>` wake, delivered as a `channel:incoming` card message |
 | `references/hazards.md` | Failure modes with their mitigations: unmanaged timers, no HTTP ingress, settings access, session multiplication, name collisions |
 | `references/testing.md` | The two-tier test pattern, the assertion shape for a blocker, and what cannot be tested in-process |
 | `references/packaging.md` | `omp.extensions` declaration, dual-surface installs, marketplace choice, version and docs rules |
@@ -149,7 +149,7 @@ A well-built extension meets these standards:
 - **Contract:** default-export factory, harness imported type-only, registration during load, runtime actions from handlers
 - **Declared:** `omp.extensions` in the plugin's `package.json`, entries resolving to real files
 - **Safe:** managed timers only; no unguarded background throw; listener lifetime closed on `session_shutdown`; process-scoped state is singleton-aware
-- **Waking correctly:** `sendUserMessage` (no options) for a wake; `deliverAs: "followUp"` never wakes an idle session
+- **Waking correctly:** `sendUserMessage` (no options) or `sendMessage(msg, { triggerTurn: true })` for a wake; `deliverAs: "followUp"` never wakes an idle session; a channel plugin sends the typed card form so the sender metadata survives
 - **Tested:** a `bun test` suite drives each handler through a stub `pi`; a `tool_call` blocker asserts both arms (blocked and passing)
 - **Documented:** the manual-only surface (live turns, MCP delivery, timers, UI) is stated explicitly rather than implied
 - **Packaged:** version bumped in both manifests, README/marketplace tables updated in the same commit, plugin cache never hand-edited

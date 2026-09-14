@@ -1,7 +1,7 @@
 {
   "name": "webhooks",
   "description": "Receive webhook events from external systems (GitHub, Stripe, Svix, CI/CD, etc.) as channel notifications. Express listener with HMAC-SHA256 and Svix signature verification, IP allowlisting, and add/edit/remove management.",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "keywords": [
     "webhooks",
     "http",
