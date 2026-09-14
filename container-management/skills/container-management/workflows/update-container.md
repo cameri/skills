@@ -78,7 +78,26 @@ cd $CONTAINERS_ROOT/<service>
 docker build -t <service>:test -f Containerfile .  # or Dockerfile
 # If build succeeds, do a smoke-run
 docker run --rm <service>:test <entry-or-version-flag> 2>&1 | head -5
-# Then deploy
+```
+
+**Assert the image when the service has an image spec** (`<service>/image-test.yaml`,
+run by `$CONTAINERS_ROOT/scripts/image-test`):
+
+```bash
+cd $CONTAINERS_ROOT
+scripts/image-test --spec <service>/image-test.yaml --image <service>:test
+# after deploying, assert what is actually running instead of a tag:
+scripts/image-test --spec <service>/image-test.yaml --running <container_name>
+```
+
+A spec earns its place when the image's silent regression would be an incident —
+dropped binaries, caches accidentally baked in, a lost mount point — not for style.
+See "Testing container images" in `$CONTAINERS_ROOT/README.md` before writing one:
+container-structure-test expands `$NAME` in a spec itself, so a shell loop in a
+spec can pass without checking anything.
+
+Then deploy:
+```bash
 cd $CONTAINERS_ROOT
 docker compose up -d --build <service>
 sleep 15
@@ -111,7 +130,13 @@ If the file doesn't exist yet, create it with the header first.
 - Pre-change snapshot captured
 - Image/dependencies updated (tag + sha256 pinned)
 - Build succeeds (for custom images)
+- Image assertions pass, when the service has an `image-test.yaml`
 - Container is running and healthy after update
 - Changes committed and pushed (or reverted on failure)
 - Log entry appended to UPDATE-LOG.md
+
+Containerfile/Dockerfile edits are also checked by CI
+(`.github/workflows/container-static.yml`: hadolint, `docker buildx build --check`
+per file, and the version pins `scripts/version-check` reads) — a red check there
+means the change is not ready, independent of whether the image built locally.
 </success_criteria>
