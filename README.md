@@ -34,6 +34,7 @@ Monorepo of Claude Code plugins and slash commands by Ricardo Arturo Cabral Mej�
 | [replicator](./replicator/) | Grows and prunes this instance's own skill set — captures reusable procedures during work, and nightly meditates on usage history and frontier sources to build or mute skills with scrutiny; publishes a gene registry over Nostr and mirrors it to a GitHub gist | Claude |
 | [repo-hygiene-sweep](./repo-hygiene-sweep/) | Sweep every standalone repo in a multi-repo workspace for uncommitted or unpushed work, without missing the ones a plain `git status`/`jj status` from the workspace root can't see | Claude |
 | [research-tools](./research-tools/) | Deliberately-invoked research skills — competitive analysis, deep-dive investigation, feasibility checks, landscape mapping, options comparison, and technical implementation research | Claude |
+| [routines](./routines/) | Schedule routines in natural language — 'every 3 minutes', 'every weekday at 9am', 'once in 5 minutes' — with an atomic job store, a single-scheduler lease across sessions, and missed-fire catch-up | Claude |
 | [sandbox-manager](./sandbox-manager/) | Manage the Claude Code sandbox itself — restart sessions, manage its own plugins/marketplaces, run post-restart health checks, and set up herdr for remote SSH attach | Claude |
 | [simple-english](./simple-english/) | Write or rewrite technical text with the rules of ASD-STE100 Simplified Technical English so it is clear, unambiguous, and free of AI slop | Claude |
 | [technitium-dns](./technitium-dns/) | Manage a self-hosted Technitium DNS Server — zones, records, stats, and cache | Claude + Cursor |
@@ -338,6 +339,14 @@ private/loopback/link-local/CGNAT destinations).
 | `/research-tools:options` | Structured side-by-side comparison of options with a recommendation |
 | `/research-tools:technical` | Research implementation approaches, libraries, and patterns with honest tradeoffs |
 
+### routines
+
+| Skill | Description |
+|---|---|
+| `/routines:routine` | Schedule a recurring or one-time routine in natural language; when it fires, the task is handed to a subagent |
+
+Unlike its predecessor `cronjobs`, `routines` still owns a process: the extension half is the interface, and an MCP stdio child (`routines`) does the scheduling. The two halves plus what they share are spelled out in its [README](./routines/README.md).
+
 ## Commands
 
 | Command | Description |
@@ -405,7 +414,7 @@ After reloading, all plugin skills are available (e.g. `/paperless:configure`, `
 
 Cursor reads the same `SKILL.md` format as Claude Code (frontmatter `name`/`description`, discovered from `.cursor/skills/<name>/SKILL.md`) and the same `.mcp.json` shape (`{"mcpServers": {...}}`, read from `~/.cursor/mcp.json`). No plugin content needs to change for Cursor — only how it's discovered.
 
-The 12 plugins marked "Claude + Cursor" in the table above (`paperless`, `actual-budget`, `technitium-dns`, `home-assistant`, `wallabag`, `elevenlabs`, `container-management`, `finance-manager`, `audiobookshelf`, `anydoc`, `agent-resources`, `consider`) work under Cursor. Channel plugins (`telegram-ng`, `nostr`, `webhooks`, `cronjobs`, `sandbox-manager`) stay Claude-only — they react to inbound background messages, which has no Cursor equivalent since Cursor is an interactive editor, not a background message host. `netshoot` also stays Claude-only for now.
+The 12 plugins marked "Claude + Cursor" in the table above (`paperless`, `actual-budget`, `technitium-dns`, `home-assistant`, `wallabag`, `elevenlabs`, `container-management`, `finance-manager`, `audiobookshelf`, `anydoc`, `agent-resources`, `consider`) work under Cursor. Channel plugins (`telegram-ng`, `nostr`, `webhooks`, `cronjobs`, `sandbox-manager`, `routines`) stay Claude-only — they react to inbound background messages, which has no Cursor equivalent since Cursor is an interactive editor, not a background message host. `netshoot` also stays Claude-only for now.
 
 ### 1. Symlink each skill directory
 

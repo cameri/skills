@@ -385,6 +385,19 @@
       "source": "./research-tools"
     },
     {
+      "name": "routines",
+      "description": "Schedule routines in natural language \u2014 'every 3 minutes', 'every weekday at 9am', 'once in 5 minutes'. Fires channel notifications when due, with a durable job store, a single-scheduler lease and missed-fire catch-up.",
+      "tools": [
+        "claude"
+      ],
+      "category": "productivity",
+      "author": {
+        "name": "Ricardo Arturo Cabral Mej\u00eda",
+        "email": "cameri@users.noreply.github.com"
+      },
+      "source": "./routines"
+    },
+    {
       "name": "sandbox-manager",
       "description": "Manage the Claude Code sandbox itself \u2014 restart sessions, manage its own plugins/marketplaces, run post-restart health checks, and set up herdr for remote SSH attach.",
       "tools": [
