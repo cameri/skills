@@ -8,6 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **The fund-flow Sankey draws properly now. `finance-manager` 0.13.2.** It is what it
+  claimed to be: every node is a rectangle, every band is a constant-width link
+  between two nodes, and the canvas is sized to the stack rather than the stack
+  clipped to the canvas. Four defects, all seen by rendering the SVG outside the
+  page: one large income node was drawn as a ~340px stroke smear across the canvas
+  (bands were strokes with no nodes to attach to, all converging on a single
+  mid-line point); the long expense labels ran past the right edge; the
+  internal-transfers caption was drawn two pixels below the canvas; and a canvas
+  too short for its minimum node heights pushed the last destination off the bottom.
+  The canvas is also narrower, because the report is read on a phone - at 720 units
+  scaled to a phone width, 11px text renders at about five physical pixels. Plus
+  `_svg` now declares its namespace, without which the same markup lost every label
+  when rendered as a standalone file.
+
+### Fixed
 - **The manual-balances file now has a documented shape. `finance-manager` 0.13.1.**
   The first real run found no `docs/finance/manual-balances.json` and the workflow
   did not say what it should contain, so the next run would have invented a format

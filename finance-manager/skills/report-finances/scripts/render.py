@@ -203,13 +203,62 @@ def gap(text):
 # --------------------------------------------------------------------------
 
 def _svg(width, height, body):
-    return (f'<svg viewBox="0 0 {width} {height}" width="100%" '
-            f'height="{height}" role="img" preserveAspectRatio="xMidYMid meet">'
+    # xmlns is what makes the same markup render as a standalone file as well as
+    # inline; without it a rasteriser drops the text and every label vanishes.
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
+            f'width="100%" height="{height}" role="img" preserveAspectRatio="xMidYMid meet">'
             f'{body}</svg>')
 
 
+def _wrap(text, width):
+    """Greedy wrap, because a 44-character expense name is wider than the canvas.
+
+    A word longer than the column is hard-broken rather than allowed to overhang:
+    with no fonts available to measure against, the width budget is characters, and
+    one long word was enough to push a label past the canvas edge.
+    """
+    words, line, out = [], "", []
+    for word in str(text).split():
+        while len(word) > width:
+            words.append(word[:width])
+            word = word[width:]
+        words.append(word)
+    for word in words:
+        candidate = (line + " " + word).strip()
+        if len(candidate) <= width or not line:
+            line = candidate
+        else:
+            out.append(line)
+            line = word
+    if line:
+        out.append(line)
+    return out[:3]
+
+
+def _esc_lines(lines, x, y, anchor, size, fill, line_height=None):
+    """Multi-line text. The full string rides along in a title for hover and for
+    assistive tech, since the visible label may be wrapped or trimmed."""
+    line_height = line_height or size + 2
+    tspans = "".join(
+        f'<tspan x="{x}" dy="{0 if n == 0 else line_height}">{esc(t)}</tspan>'
+        for n, t in enumerate(lines)
+    )
+    return (f'<text x="{x}" y="{y}" text-anchor="{anchor}" font-size="{size}" '
+            f'fill="{fill}"><title>{esc(" ".join(lines))}</title>{tspans}</text>')
+
+
 def sankey(flow, currency="$"):
-    """Three columns: income sources -> the household -> destinations."""
+    """Income -> the household -> destinations, as a three-column sankey.
+
+    Every node is drawn as a rectangle, and every band is a constant-width link
+    between two of them. The earlier version drew bands only, all of which converged
+    on a single mid-line point: one large income node became a ~340px smear across
+    the canvas, the destinations ended in unlabelled flush cuts, the long expense
+    names ran past the right edge, and the internal-transfers caption was drawn two
+    pixels below the canvas. Canvas width is deliberately narrow (420) because the
+    report is read on a phone: a 720-unit canvas scaled to a phone width renders
+    11px text at about five physical pixels.
+    """
     income = flow.get("income") or []
     expense = flow.get("expense") or []
     savings = flow.get("savings") or {}
@@ -234,86 +283,118 @@ def sankey(flow, currency="$"):
     internal = float(flow.get("internal_transfers") or 0)
     in_total = sum(v for _, v in left)
     out_total = sum(v for _, v in right)
-
     if not left and not right:
         return gap("No flow data in this month's snapshot.") if not internal else ""
 
-    width, height = 720, 420
-    top, bottom = 40, height - 30
-    usable = bottom - top
-    gap_px = 10
+    # Geometry. Width is fixed and narrow; height follows the node count so a month
+    # with fifteen destinations stays legible instead of shrinking its bands.
+    width = 420
+    pad_top, pad_bottom = 34, 16
+    footer = 46 if internal else 0
+    gap_px = 9
+    min_h = 16.0
+    rows = max(len(left), len(right))
+    height = int(pad_top + pad_bottom + footer + rows * (min_h + gap_px))
 
-    def lay(nodes, total):
-        if not nodes or total <= 0:
-            return []
-        scale = (usable - gap_px * max(len(nodes) - 1, 0)) / total
-        out, y = [], top
+    x_lab_l, x_node_l, x_node_l2 = 108, 112, 124
+    x_hub, x_hub2 = 246, 258
+    x_node_r, x_node_r2, x_lab_r = 288, 300, 306
+    label_w = 14
+
+    scale_total = max(in_total, out_total) or 1.0
+    stack_top = pad_top + 18  # 18 for the totals line
+
+    def lay(nodes, scale):
+        out, y = [], stack_top
         for name, value in nodes:
-            h = max(1.0, value * scale)
+            h = max(min_h if value else 2.0, value * scale)
             out.append({"name": name, "value": value, "y": y, "h": h})
             y += h + gap_px
         return out
 
-    lset = lay(left, in_total)
-    rset = lay(right, out_total)
+    # Minimum node heights mean the stack can be taller than the first guess, so the
+    # canvas is fitted to the stack rather than the stack clipped to the canvas: a
+    # canvas that is too short pushed the last destination and its label past the
+    # bottom edge. Three passes converge, since only the minimum can grow a stack.
+    for _ in range(3):
+        usable = height - stack_top - pad_bottom - footer
+        scale = max(0.0001, (usable - gap_px * (rows - 1)) / scale_total) if rows > 1 else usable / scale_total
+        lset, rset = lay(left, scale), lay(right, scale)
+        stack_bottom = max([n["y"] + n["h"] for n in lset + rset] or [stack_top])
+        if stack_bottom + pad_bottom + footer <= height:
+            break
+        height = int(stack_bottom + pad_bottom + footer)
 
-    mid_h = max(20.0, min(usable, max(in_total, out_total) * ((usable - gap_px * max(len(left) + len(right) - 2, 0)) / max(in_total, out_total, 1)) * 0.35))
-    mid_y = (top + bottom) / 2 - mid_h / 2
+    span_top = min([n["y"] for n in lset + rset] or [stack_top])
+    span_bottom = max([n["y"] + n["h"] for n in lset + rset] or [stack_top])
 
-    x0, x1, x2 = 130, width / 2, width - 130
-    body = []
+    # The hub spans the same scale as the columns, so its height is comparable to
+    # them rather than the arbitrary fraction the old formula produced, and it is
+    # centred on the nodes rather than on the canvas.
+    hub_h = max(min_h, max(in_total, out_total) * scale)
+    hub_y = span_top + max(0.0, ((span_bottom - span_top) - hub_h) / 2)
 
-    if internal:
-        band_y = bottom + 6
-        band_h = 14
-        body.append(
-            f'<rect x="{x0}" y="{band_y}" width="{x2 - x0}" height="{band_h}" fill="none" '
-            f'stroke="{RULE}" stroke-dasharray="4 3" rx="3"/>'
+    body = [
+        f'<text x="{x_node_l}" y="{pad_top}" font-size="11" fill="{MUTED}">'
+        f'in {esc(short(in_total, currency))} · out {esc(short(out_total, currency))}</text>'
+    ]
+
+    def band(x0, y0, x1, y1, h, colour):
+        mx = (x0 + x1) / 2
+        return (
+            f'<path d="M {x0} {y0} C {mx} {y0}, {mx} {y1}, {x1} {y1}" fill="none" '
+            f'stroke="{colour}" stroke-opacity="0.30" stroke-width="{max(1.0, h):.1f}"/>'
         )
-        body.append(
-            f'<text x="{x2}" y="{band_y + band_h + 12}" text-anchor="end" font-size="11" fill="{MUTED}">'
-            f'internal transfers {esc(short(internal, currency))} — own-account movement, not spending</text>'
-        )
-        height += 30
+
+    # Income -> hub, each link keeping its own slot on the hub so nothing neck-lines.
+    cursor = hub_y
+    for node in lset:
+        share = (node["h"] / max(in_total * scale, 1)) * hub_h
+        cy_node, cy_hub = node["y"] + node["h"] / 2, cursor + share / 2
+        body.append(band(x_node_l2, cy_node, x_hub, cy_hub, min(node["h"], share or node["h"]), ACCENT))
+        cursor += share
+
+    cursor = hub_y
+    for node in rset:
+        share = (node["h"] / max(out_total * scale, 1)) * hub_h
+        cy_node, cy_hub = node["y"] + node["h"] / 2, cursor + share / 2
+        body.append(band(x_hub2, cy_hub, x_node_r, cy_node, min(node["h"], share or node["h"]), GOOD))
+        cursor += share
+
+    for node, x_node, x_lab, anchor in ((n, (x_node_l, x_node_l2), x_lab_l, "end") for n in lset):
+        pass  # placeholder replaced below
 
     for node in lset:
+        body.append(f'<rect x="{x_node_l}" y="{node["y"]:.1f}" width="12" height="{max(2.0, node["h"]):.1f}" rx="2" fill="{ACCENT}"/>')
         cy = node["y"] + node["h"] / 2
-        body.append(
-            f'<path d="M {x0} {node["y"]} C {(x0 + x1) / 2} {node["y"]}, {(x0 + x1) / 2} {mid_y}, {x1} {mid_y}" '
-            f'stroke="{ACCENT}" stroke-opacity="0.35" fill="none" stroke-width="{node["h"]:.1f}"/>'
-        )
-        body.append(
-            f'<text x="{x0 - 8}" y="{cy + 3}" text-anchor="end" font-size="11" fill="{INK}">'
-            f'{esc(node["name"])}</text>'
-        )
-        body.append(
-            f'<text x="{x0 - 8}" y="{cy + 16}" text-anchor="end" font-size="10" fill="{MUTED}">'
-            f'{esc(short(node["value"], currency))}</text>'
-        )
-
-    body.append(f'<rect x="{x1 - 1}" y="{mid_y}" width="2" height="{mid_h}" fill="{INK}"/>')
-    body.append(
-        f'<text x="{x1}" y="{mid_y - 8}" text-anchor="middle" font-size="12" fill="{INK}">'
-        f'household</text>'
-    )
+        lines = _wrap(node["name"], label_w)
+        body.append(_esc_lines(lines, x_lab_l, cy - (len(lines) - 1) * 5.5 + 3, "end", 11, INK))
+        body.append(f'<text x="{x_node_l2 + 4}" y="{cy + 3}" font-size="10" fill="{MUTED}">'
+                    f'{esc(short(node["value"], currency))}</text>')
 
     for node in rset:
+        body.append(f'<rect x="{x_node_r}" y="{node["y"]:.1f}" width="12" height="{max(2.0, node["h"]):.1f}" rx="2" fill="{GOOD}"/>')
         cy = node["y"] + node["h"] / 2
+        lines = _wrap(node["name"], 14)
+        body.append(_esc_lines(lines, x_lab_r, cy - (len(lines) - 1) * 6 + 3, "start", 11, INK, 12))
+        body.append(f'<text x="{x_node_r - 4}" y="{cy + 3}" text-anchor="end" font-size="10" fill="{MUTED}">'
+                    f'{esc(short(node["value"], currency))}</text>')
+
+    body.append(f'<rect x="{x_hub}" y="{hub_y:.1f}" width="12" height="{hub_h:.1f}" rx="2" fill="{INK}"/>')
+    body.append(f'<text x="{x_hub}" y="{hub_y - 5:.1f}" font-size="11" fill="{MUTED}">household</text>')
+
+    if internal:
+        band_y = height - pad_bottom - 30
         body.append(
-            f'<path d="M {x1} {mid_y} C {(x1 + x2) / 2} {mid_y}, {(x1 + x2) / 2} {node["y"]}, {x2} {node["y"]}" '
-            f'stroke="{GOOD}" stroke-opacity="0.32" fill="none" stroke-width="{node["h"]:.1f}"/>'
+            f'<rect x="{x_node_l}" y="{band_y}" width="{x_node_r2 - x_node_l}" height="16" rx="3" '
+            f'fill="none" stroke="{RULE}" stroke-dasharray="4 3"/>'
         )
         body.append(
-            f'<text x="{x2 + 8}" y="{cy + 3}" font-size="11" fill="{INK}">{esc(node["name"])}</text>'
-        )
-        body.append(
-            f'<text x="{x2 + 8}" y="{cy + 16}" font-size="10" fill="{MUTED}">'
-            f'{esc(short(node["value"], currency))}</text>'
+            f'<text x="{x_node_l}" y="{band_y + 28}" font-size="10" fill="{MUTED}">'
+            f'internal transfers {esc(short(internal, currency))} — own-account movement, not spending</text>'
         )
 
-    totals = (f'<text x="0" y="14" font-size="11" fill="{MUTED}">'
-              f'in {esc(short(in_total, currency))} · out {esc(short(out_total, currency))}</text>')
-    return _svg(width, height, totals + "".join(body))
+    return _svg(width, height, "".join(body))
 
 
 def net_worth_line(series, currency="$"):
