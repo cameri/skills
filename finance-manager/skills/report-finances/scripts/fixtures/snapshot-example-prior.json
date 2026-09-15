@@ -1,0 +1,108 @@
+{
+  "month": "2026-07",
+  "generated_at": "2026-08-01T13:05:00Z",
+  "generated_by": "synthetic fixture — not a real household",
+  "as_of": { "ledger": "2026-08-01T13:02:11Z", "manual_entry": "2026-07-31" },
+  "summary": "Synthetic sample month, one month earlier than the other fixture, so the series and the trend have two points to draw.",
+
+  "highlights": [
+    { "text": "Consumption was in line with the previous month.", "label": "fact" },
+    { "text": "Savings contributions resumed after a one-month pause.", "label": "fact" }
+  ],
+
+  "net_worth": {
+    "as_of": "2026-08-01T13:02:11Z",
+    "total": 139700,
+    "buckets": [
+      { "name": "Liquid Cash", "value": 17600, "basis": "measured", "as_of": "2026-08-01T13:02:11Z", "note": "" },
+      { "name": "Tax Shelters", "value": 61800, "basis": "measured", "as_of": "2026-08-01T13:02:11Z", "note": "" },
+      { "name": "Home Equity", "value": 52000, "basis": "reconstructed", "as_of": "2025-12-31", "note": "from the last stated valuation and the mortgage balance" },
+      { "name": "Bitcoin", "value": 3400, "basis": "measured", "as_of": "2026-08-01T13:04:02Z", "note": "at cost basis, not market value" },
+      { "name": "Debt", "value": -5100, "basis": "measured", "as_of": "2026-08-01T13:02:11Z", "note": "credit card balance carried" }
+    ]
+  },
+
+  "flow": {
+    "income": [
+      { "name": "Salary — one", "amount": 6200 },
+      { "name": "Salary — two", "amount": 2800 }
+    ],
+    "expense": [
+      { "name": "Housing", "amount": 2140 },
+      { "name": "Groceries", "amount": 1010 },
+      { "name": "Transport", "amount": 380 },
+      { "name": "Utilities", "amount": 275 },
+      { "name": "Insurance", "amount": 230 },
+      { "name": "Dining out", "amount": 340 },
+      { "name": "Travel", "amount": 410 },
+      { "name": "Everything else", "amount": 395 }
+    ],
+    "expense_basis": "consumption",
+    "debt_paydown": { "mortgage_principal": 1810, "other": 0, "note": "principal is debt paydown, not consumption" },
+    "internal_transfers": 11400,
+    "savings": { "cash": 700, "cost_basis_assets": 380, "liabilities": 0 },
+    "off_budget_accounts": [
+      { "name": "Brokerage", "delta": 700, "kind": "cash", "basis": "manual", "not_updated_since": "2026-06-30" },
+      { "name": "Retirement", "delta": 560, "kind": "cost_basis", "basis": "measured", "not_updated_since": null },
+      { "name": "Savings", "delta": 240, "kind": "cash", "basis": "measured", "not_updated_since": null }
+    ],
+    "transfer_pairs": { "matched": 12, "linked": 8, "window_days": 21 },
+    "off_budget_expense": [
+      { "name": "Property tax", "amount": 318, "note": "paid from an account that is not on the budget" }
+    ]
+  },
+
+  "goals": [
+    { "name": "Emergency fund", "target": 24000, "current": 17600, "target_date": "2027-06-01", "on_track": true, "note": "" },
+    { "name": "Home deposit top-up", "target": 40000, "current": 11800, "target_date": "2028-01-01", "on_track": false, "note": "behind plan" }
+  ],
+
+  "liquidity": {
+    "liquid_cash": 17600,
+    "monthly_consumption": 5180,
+    "runway_months": 3.4,
+    "note": "runway excludes tax-sheltered accounts"
+  },
+
+  "allocation": [
+    { "name": "Cash", "value": 17600, "percent": 12.6 },
+    { "name": "Registered investments", "value": 61800, "percent": 44.2 },
+    { "name": "Home equity", "value": 52000, "percent": 37.2 },
+    { "name": "Bitcoin", "value": 3400, "percent": 2.4 },
+    { "name": "Other assets", "value": 5000, "percent": 3.6 }
+  ],
+
+  "tax": {
+    "room": [
+      { "name": "Retirement account", "used": 7500, "limit": 14000 },
+      { "name": "Tax-free account", "used": 5000, "limit": 7000 }
+    ],
+    "observations": [
+      { "text": "Registered room remains unclaimed.", "label": "fact" }
+    ]
+  },
+
+  "findings": [
+    { "statement": "Two recurring subscriptions show no usage.", "label": "fact", "check": "subscription drift", "impact": "about 504 a year" }
+  ],
+
+  "narrative": {
+    "statements": [
+      { "text": "Keep contributions steady; the pause last month was the exception, not the pattern.", "label": "advice", "reasoning": "contributions resumed without any change to fixed costs" }
+    ]
+  },
+
+  "actions": [
+    { "action": "Ask the brokerage for a current statement and enter the balance", "owner": "household", "carried_since": "2026-07", "status": "open" }
+  ],
+
+  "data_notes": [
+    { "note": "Brokerage balance is from June.", "reason": "no automatic feed, manual entry not yet supplied", "since": "2026-06-30" },
+    { "note": "One loan still shows a balance although it was repaid.", "reason": "closure is a reconciliation job, not this report's", "since": "2026-07-26" }
+  ],
+
+  "inputs_used": [
+    { "source": "budget tool: accounts and transactions", "detail": "month 2026-07", "manual": false },
+    { "source": "manual-balances.json", "detail": "brokerage entry carried forward from June", "manual": true }
+  ]
+}

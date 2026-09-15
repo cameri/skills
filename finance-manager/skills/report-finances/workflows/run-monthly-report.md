@@ -20,7 +20,9 @@ a `note`. Read the entries for this month.
 
 **If an account has no entry for this month, do not block and do not zero it:**
 carry the last entry forward with `not_updated_since` set to that entry's date,
-so the page shows a dated staleness marker. A household asked to type numbers
+so the page shows a dated staleness marker. If the file does not exist at all
+yet, treat every manual account as not updated and say so in `data_notes` — the
+first run is not blocked by a file nobody has filled in. A household asked to type numbers
 into a report that fails without them stops producing the report.
 
 ## 3. Derive the figures

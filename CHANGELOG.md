@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **`report-finances` — the monthly household financial report. `finance-manager` 0.12.0.**
+  A new skill that renders one self-contained HTML page per month from a JSON snapshot,
+  with a fund-flow Sankey, net worth against the same month last year, goal progress,
+  liquidity, allocation, the tax picture, labeled findings and advice, and the data gaps
+  named. `scripts/render.py` is standard-library only, emits inline SVG with no script
+  tag and no external URL of any kind, and is a pure function of the snapshot — so a
+  past month can be re-rendered exactly and two months can be diffed. `validate` enforces
+  the schema, including the two rules that carry the design: **every statement is
+  labeled** `fact`/`projection`/`advice`, and **at most three actions** are carried
+  forward. Ships with a fully synthetic fixture, because the skill is portable and no
+  household's figures belong in this repo. The analysis is not duplicated: it remains
+  `review-finances`, and this is the presentation, cadence and archive layer above it.
+
 ### Fixed
 - **Channel pushes render as cards instead of anonymous user text** (2026-09-14).
   `telegram-ng` 0.13.3, `cronjobs` 0.1.8, `webhooks` 0.2.5, `agent-resources` 0.3.1.
