@@ -307,54 +307,62 @@ def sankey(flow, currency="$"):
     if not left and not right:
         return gap("No flow data in this month's snapshot.") if not internal else ""
 
-    # Geometry. Width is fixed and narrow; height follows the node count so a month
-    # with fifteen destinations stays legible instead of shrinking its bands. The
-    # vertical stack is kept deliberately tight: every unit of height costs the
-    # ribbons horizontal run, because the canvas is not widened to pay for it.
+    # Geometry: two columns, links that tile their endpoints exactly.
+    #
+    # The invariant a sankey has to satisfy is that every link starts on the node it
+    # leaves and ends on the node it reaches, at the same thickness at both ends. The
+    # previous version handed the left-hand ends out across the span of BOTH columns,
+    # so as soon as the destination column grew taller than the two income bars, six
+    # of fourteen ribbons began in blank space below them - "some outflows don't even
+    # connect to the inflows", and correctly so: the picture was creating money.
+    #
+    # The fix is to lay the columns out so the equality is structural rather than
+    # hoped for. The right column's bars are sized from their values (with a floor, so
+    # a $68 destination stays visible); the left column is then given exactly that
+    # total, shared out by income value and with no gaps, so the run the links leave
+    # from is precisely the run the bars cover. Both ends of every link then have the
+    # same thickness by construction, and the checks below refuse to draw the diagram
+    # if that ever stops being true.
     width = 420
     pad_top, pad_bottom = 28, 14
     footer = 36 if internal else 0
-    gap_px = 5
-    min_h = 9.0
-    rows = max(len(left), len(right))
-    height = int(pad_top + pad_bottom + footer + rows * (min_h + gap_px))
+    # The pitch has to clear a two-line label: names wrap at label_w characters, and
+    # at the old 9+5 pitch the second line of one node landed on the first line of the
+    # next - "Deals" printed over "Fitness", most of a column unreadable.
+    min_h, gap_px = 12.0, 11.0
+    stack_top = pad_top + 18  # 18 for the totals line
 
     x_lab_l, x_node_l, x_node_l2 = 104, 108, 120
     x_node_r, x_node_r2, x_lab_r = 288, 300, 306
     label_w = 14
 
-    scale_total = max(in_total, out_total) or 1.0
-    stack_top = pad_top + 18  # 18 for the totals line
+    def sized(nodes, scale):
+        """Bars sized from their values: max(min_h, value * scale)."""
+        return [
+            {"name": name, "value": value, "h": max(min_h if value else 2.0, value * scale)}
+            for name, value in nodes
+        ]
 
-    def lay(nodes, scale):
+    def placed(nodes, gaps):
+        """Stack them from stack_top, with or without gaps between."""
         out, y = [], stack_top
-        for name, value in nodes:
-            h = max(min_h if value else 2.0, value * scale)
-            out.append({"name": name, "value": value, "y": y, "h": h})
-            y += h + gap_px
+        for node in nodes:
+            out.append({**node, "y": y})
+            y += node["h"] + (gap_px if gaps else 0.0)
         return out
 
-    # Minimum node heights mean the stack can be taller than the first guess, so the
-    # canvas is fitted to the stack rather than the stack clipped to the canvas: a
-    # canvas that is too short pushed the last destination and its label past the
-    # bottom edge. Three passes converge, since only the minimum can grow a stack.
-    for _ in range(3):
-        usable = height - stack_top - pad_bottom - footer
-        scale = max(0.0001, (usable - gap_px * (rows - 1)) / scale_total) if rows > 1 else usable / scale_total
-        lset, rset = lay(left, scale), lay(right, scale)
-        stack_bottom = max([n["y"] + n["h"] for n in lset + rset] or [stack_top])
-        if stack_bottom + pad_bottom + footer <= height:
-            break
-        height = int(stack_bottom + pad_bottom + footer)
-
-    span_top = min([n["y"] for n in lset + rset] or [stack_top])
-    span_bottom = max([n["y"] + n["h"] for n in lset + rset] or [stack_top])
-
-
-    body = [
-        f'<text x="{x_node_l}" y="{pad_top}" font-size="11" fill="{MUTED}">'
-        f'in {esc(short(in_total, currency))} · out {esc(short(out_total, currency))}</text>'
-    ]
+    # One pass: the destination column sets the height, because its floors make it the
+    # one that cannot be derived analytically from a target - so it is measured, and
+    # the income column is then given the same total.
+    target = max(len(left), len(right)) * (min_h + gap_px)
+    rset = placed(sized(right, target / out_total if out_total else 0.0), gaps=True)
+    span_h = sum(n["h"] for n in rset)
+    lset = placed(
+        [{"name": name, "value": value, "h": (value / in_total) * span_h if in_total else 0.0}
+         for name, value in left],
+        gaps=False,
+    )
+    height = int(stack_top + span_h + gap_px * max(0, len(rset) - 1) + pad_bottom + footer)
 
     def band(x0, y0, x1, y1, h, colour):
         """A straight ribbon from one node to another, h units thick.
@@ -364,30 +372,50 @@ def sankey(flow, currency="$"):
         apparent thickness and two links crossing the same region merge into a smear.
         Filled quads keep the thickness honest at both ends.
         """
-        t = max(1.0, h) / 2
+        t = max(0.6, h) / 2
         return (
             f'<path d="M {x0:.1f} {y0 - t:.1f} L {x1:.1f} {y1 - t:.1f} '
             f'L {x1:.1f} {y1 + t:.1f} L {x0:.1f} {y0 + t:.1f} Z" '
             f'fill="{colour}" fill-opacity="0.45"/>'
         )
 
-    # Income straight to destinations, with no middle node.
-    #
-    # There used to be a "household" hub that every link passed through, and it was the
-    # root of both of the reader's complaints. It halved the horizontal run - the
-    # hub-to-destination links had 30 units to cross against a stack 500 units tall,
-    # so they drew as near-vertical smears - and because it carried no information
-    # beyond "everything passes through here" it only existed to be crossed. Removing
-    # it doubles the run (120 -> 288), and the money still reconciles: the shares on
-    # the left are the destinations' own share of the income pool, so the left column
-    # carries in_total and the right column carries out_total.
-    led = span_top
+    # Income flows straight to its destinations; there is no middle node. Each link
+    # takes the next run of the left column, sized to exactly the destination it feeds,
+    # so the two ends match and nothing is left over at the bottom.
+    links, led = [], stack_top
     for node in rset:
-        share = (node["h"] / max(out_total * scale, 1)) * (span_bottom - span_top)
-        cy_dest = node["y"] + node["h"] / 2
-        cy_src = led + share / 2
-        body.append(band(x_node_l2, cy_src, x_node_r, cy_dest, min(node["h"], share or node["h"]), GOOD))
-        led += share
+        h = node["h"]
+        links.append({"y0": led + h / 2, "y1": node["y"] + h / 2, "h": h})
+        led += h
+
+    # The diagram is only worth drawing if it is true. These are the two ways a
+    # previous version broke the reader's trust, so they are checked here rather than
+    # trusted: every link inside the source column, every link on the bar it feeds.
+    left_top, left_bottom = stack_top, stack_top + span_h
+    for link in links:
+        if not (left_top - 1e-6 <= link["y0"] - link["h"] / 2 and link["y0"] + link["h"] / 2 <= left_bottom + 1e-6):
+            raise ValueError(
+                f"sankey: link from y={link['y0']:.1f} (h={link['h']:.1f}) falls outside the "
+                f"source column {left_top:.1f}..{left_bottom:.1f}; the diagram would draw money "
+                "from nowhere"
+            )
+    for link, node in zip(links, rset):
+        if abs(link["y1"] - (node["y"] + node["h"] / 2)) > 1e-6 or abs(link["h"] - node["h"]) > 1e-6:
+            raise ValueError(f"sankey: link does not match destination {node['name']!r}")
+    if abs((led - left_bottom)) > 1e-6:
+        raise ValueError(
+            f"sankey: links cover {led - stack_top:.1f} of the source column's {span_h:.1f} units"
+        )
+    if sum(n["h"] for n in lset) - span_h > 1e-6:
+        raise ValueError("sankey: source bars are taller than the links they must feed")
+
+    body = [
+        f'<text x="{x_node_l}" y="{pad_top}" font-size="11" fill="{MUTED}">'
+        f'in {esc(short(in_total, currency))} · out {esc(short(out_total, currency))}</text>'
+    ]
+
+    for link in links:
+        body.append(band(x_node_l2, link["y0"], x_node_r, link["y1"], link["h"], GOOD))
 
     for node in lset:
         body.append(f'<rect x="{x_node_l}" y="{node["y"]:.1f}" width="12" height="{max(2.0, node["h"]):.1f}" rx="2" fill="{ACCENT}"/>')
