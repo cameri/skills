@@ -391,7 +391,13 @@ def sankey(flow, currency="$"):
     # The diagram is only worth drawing if it is true. These are the two ways a
     # previous version broke the reader's trust, so they are checked here rather than
     # trusted: every link inside the source column, every link on the bar it feeds.
-    left_top, left_bottom = stack_top, stack_top + span_h
+    # Measured against the bars that will actually be drawn (their own last y + h), not
+    # against span_h. Comparing with span_h only re-states the construction: a mutation
+    # that shortens the source bars passed that version silently, because span_h comes
+    # from the destination column and never moved. The question worth asking is whether
+    # every ribbon stays inside the bars the reader can see.
+    left_top = stack_top
+    left_bottom = max([n["y"] + n["h"] for n in lset] or [stack_top])
     for link in links:
         if not (left_top - 1e-6 <= link["y0"] - link["h"] / 2 and link["y0"] + link["h"] / 2 <= left_bottom + 1e-6):
             raise ValueError(
@@ -406,8 +412,12 @@ def sankey(flow, currency="$"):
         raise ValueError(
             f"sankey: links cover {led - stack_top:.1f} of the source column's {span_h:.1f} units"
         )
-    if sum(n["h"] for n in lset) - span_h > 1e-6:
-        raise ValueError("sankey: source bars are taller than the links they must feed")
+    source_total = sum(n["h"] for n in lset)
+    if abs(source_total - span_h) > 1e-6:
+        raise ValueError(
+            f"sankey: source bars cover {source_total:.1f} units against {span_h:.1f} for the links "
+            "they must feed"
+        )
 
     body = [
         f'<text x="{x_node_l}" y="{pad_top}" font-size="11" fill="{MUTED}">'
