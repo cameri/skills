@@ -556,6 +556,16 @@ ul.notes li { margin: .3rem 0; font-size: .9rem; }
 .actions li { margin: .45rem 0; }
 @media (prefers-color-scheme: dark) {
   body { color: #e6e8ea; background: #0d1117; }
+  /* The charts and the sankey carry their colours as SVG presentation attributes,
+     which have LOWER priority than any author CSS rule - so these overrides win, and
+     nothing in the SVG has to change. On 2026-09-15 Cameri photographed the report in
+     dark mode and the category names were invisible: they were #111418 (1.0:1 against
+     #0d1117) and the dim labels #5b6570 (3.1:1). Same intent, dark-theme values. */
+  svg text { fill: #e6e8ea; }
+  svg text[fill="#5b6570"] { fill: #9aa4ae; }
+  svg rect[fill="#111418"] { fill: #e6e8ea; }
+  svg line, svg rect[fill="none"] { stroke: #2a2f36; }
+  svg circle[fill="#fff"] { fill: #0d1117; }
   h2, footer { border-color: #2a2f36; }
   .card, .metric, .gap, .metric .label, .badge, .basis, .track { border-color: #2a2f36; }
   .muted, .provenance, .metric .label, th { color: #9aa4ae; }
