@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **The manual-balances file now has a documented shape. `finance-manager` 0.13.1.**
+  The first real run found no `docs/finance/manual-balances.json` and the workflow
+  did not say what it should contain, so the next run would have invented a format
+  per run — and a format invented per run is how a balance attaches to the wrong
+  account. Entries are keyed by the config's account **id**, never its display name,
+  with `balance`, `date` and `note`; a real `0` is written as `0` and a missing entry
+  stays missing, because those two must never render the same way.
+
 ### Added
 - **The report's status is on the page. `finance-manager` 0.13.0.** A run now writes
   `reports/status.json` (`running` / `waiting` / `failed` / `done`) at every phase
