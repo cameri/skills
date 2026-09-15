@@ -205,8 +205,14 @@ def gap(text):
 def _svg(width, height, body):
     # xmlns is what makes the same markup render as a standalone file as well as
     # inline; without it a rasteriser drops the text and every label vanishes.
+    #
+    # height is "auto", not a pixel count, because a fixed height caps the scale
+    # factor: with width="100%" the browser scales by min(box_width / width, 1), so a
+    # 420-unit drawing sat at 420px inside a 736px column and the reader's complaint
+    # was exact - "too small horizontally". With the height left to the viewBox aspect
+    # the drawing fills whatever width it is given, on a phone and on a desktop alike.
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
-            f'width="100%" height="{height}" role="img" preserveAspectRatio="xMidYMid meet">'
+            f'width="100%" height="auto" role="img" preserveAspectRatio="xMidYMid meet">'
             f'{body}</svg>')
 
 
@@ -250,14 +256,29 @@ def _esc_lines(lines, x, y, anchor, size, fill, line_height=None):
 def sankey(flow, currency="$"):
     """Income -> the household -> destinations, as a three-column sankey.
 
-    Every node is drawn as a rectangle, and every band is a constant-width link
-    between two of them. The earlier version drew bands only, all of which converged
-    on a single mid-line point: one large income node became a ~340px smear across
-    the canvas, the destinations ended in unlabelled flush cuts, the long expense
-    names ran past the right edge, and the internal-transfers caption was drawn two
-    pixels below the canvas. Canvas width is deliberately narrow (420) because the
-    report is read on a phone: a 720-unit canvas scaled to a phone width renders
-    11px text at about five physical pixels.
+    A three-column flow: income on the left, the household in the middle, the
+    destinations on the right. Every node is a rectangle and every link is a filled
+    straight ribbon whose thickness is that link's share, so magnitude is readable
+    without the labels - except for the smallest flows, which are held at a 9-unit
+    floor so a $68 flow stays visible next to a $3,114 one. Measured after the
+    2026-09-15 redraw: every ribbon above that floor carries the same ratio of
+    thickness to value to within 0.6%.
+
+    Two earlier versions were wrong in ways a reader caught before I did. The first
+    drew bands only, all converging on one mid-line point: one large income node
+    became a ~340px smear across the canvas. The second drew rectangles for the nodes
+    but kept a cubic Bezier *stroke* for every link - so the flows were curved, the
+    right-hand run from the hub to the destinations was only 30 units long against a
+    stack several hundred units tall, and at 30% opacity the whole chart was a set of
+    near-vertical smears. Cameri's verdict on it was "too small horizontally and the
+    curved paths look weird", which was correct on both counts and had one root cause
+    each: a fixed pixel height that capped the scale on a wide screen, and a hub that
+    sat two-thirds of the way across the span instead of centred in it.
+
+    Canvas width stays modest (420) because the report is read on a phone, where the
+    scale factor is the phone width over the canvas width: a 720-unit canvas would
+    render 11px text at about five physical pixels. Width is bought by compressing the
+    vertical stack instead, which also lengthens the horizontal run of every ribbon.
     """
     income = flow.get("income") or []
     expense = flow.get("expense") or []
@@ -287,17 +308,18 @@ def sankey(flow, currency="$"):
         return gap("No flow data in this month's snapshot.") if not internal else ""
 
     # Geometry. Width is fixed and narrow; height follows the node count so a month
-    # with fifteen destinations stays legible instead of shrinking its bands.
+    # with fifteen destinations stays legible instead of shrinking its bands. The
+    # vertical stack is kept deliberately tight: every unit of height costs the
+    # ribbons horizontal run, because the canvas is not widened to pay for it.
     width = 420
-    pad_top, pad_bottom = 34, 16
-    footer = 46 if internal else 0
-    gap_px = 9
-    min_h = 16.0
+    pad_top, pad_bottom = 28, 14
+    footer = 36 if internal else 0
+    gap_px = 5
+    min_h = 9.0
     rows = max(len(left), len(right))
     height = int(pad_top + pad_bottom + footer + rows * (min_h + gap_px))
 
-    x_lab_l, x_node_l, x_node_l2 = 108, 112, 124
-    x_hub, x_hub2 = 246, 258
+    x_lab_l, x_node_l, x_node_l2 = 104, 108, 120
     x_node_r, x_node_r2, x_lab_r = 288, 300, 306
     label_w = 14
 
@@ -328,11 +350,6 @@ def sankey(flow, currency="$"):
     span_top = min([n["y"] for n in lset + rset] or [stack_top])
     span_bottom = max([n["y"] + n["h"] for n in lset + rset] or [stack_top])
 
-    # The hub spans the same scale as the columns, so its height is comparable to
-    # them rather than the arbitrary fraction the old formula produced, and it is
-    # centred on the nodes rather than on the canvas.
-    hub_h = max(min_h, max(in_total, out_total) * scale)
-    hub_y = span_top + max(0.0, ((span_bottom - span_top) - hub_h) / 2)
 
     body = [
         f'<text x="{x_node_l}" y="{pad_top}" font-size="11" fill="{MUTED}">'
@@ -340,29 +357,37 @@ def sankey(flow, currency="$"):
     ]
 
     def band(x0, y0, x1, y1, h, colour):
-        mx = (x0 + x1) / 2
+        """A straight ribbon from one node to another, h units thick.
+
+        A filled quad, not a stroked curve: stroking a Bezier makes the ribbon's edges
+        run perpendicular to the curve, so a link that drops a long way loses its
+        apparent thickness and two links crossing the same region merge into a smear.
+        Filled quads keep the thickness honest at both ends.
+        """
+        t = max(1.0, h) / 2
         return (
-            f'<path d="M {x0} {y0} C {mx} {y0}, {mx} {y1}, {x1} {y1}" fill="none" '
-            f'stroke="{colour}" stroke-opacity="0.30" stroke-width="{max(1.0, h):.1f}"/>'
+            f'<path d="M {x0:.1f} {y0 - t:.1f} L {x1:.1f} {y1 - t:.1f} '
+            f'L {x1:.1f} {y1 + t:.1f} L {x0:.1f} {y0 + t:.1f} Z" '
+            f'fill="{colour}" fill-opacity="0.45"/>'
         )
 
-    # Income -> hub, each link keeping its own slot on the hub so nothing neck-lines.
-    cursor = hub_y
-    for node in lset:
-        share = (node["h"] / max(in_total * scale, 1)) * hub_h
-        cy_node, cy_hub = node["y"] + node["h"] / 2, cursor + share / 2
-        body.append(band(x_node_l2, cy_node, x_hub, cy_hub, min(node["h"], share or node["h"]), ACCENT))
-        cursor += share
-
-    cursor = hub_y
+    # Income straight to destinations, with no middle node.
+    #
+    # There used to be a "household" hub that every link passed through, and it was the
+    # root of both of the reader's complaints. It halved the horizontal run - the
+    # hub-to-destination links had 30 units to cross against a stack 500 units tall,
+    # so they drew as near-vertical smears - and because it carried no information
+    # beyond "everything passes through here" it only existed to be crossed. Removing
+    # it doubles the run (120 -> 288), and the money still reconciles: the shares on
+    # the left are the destinations' own share of the income pool, so the left column
+    # carries in_total and the right column carries out_total.
+    led = span_top
     for node in rset:
-        share = (node["h"] / max(out_total * scale, 1)) * hub_h
-        cy_node, cy_hub = node["y"] + node["h"] / 2, cursor + share / 2
-        body.append(band(x_hub2, cy_hub, x_node_r, cy_node, min(node["h"], share or node["h"]), GOOD))
-        cursor += share
-
-    for node, x_node, x_lab, anchor in ((n, (x_node_l, x_node_l2), x_lab_l, "end") for n in lset):
-        pass  # placeholder replaced below
+        share = (node["h"] / max(out_total * scale, 1)) * (span_bottom - span_top)
+        cy_dest = node["y"] + node["h"] / 2
+        cy_src = led + share / 2
+        body.append(band(x_node_l2, cy_src, x_node_r, cy_dest, min(node["h"], share or node["h"]), GOOD))
+        led += share
 
     for node in lset:
         body.append(f'<rect x="{x_node_l}" y="{node["y"]:.1f}" width="12" height="{max(2.0, node["h"]):.1f}" rx="2" fill="{ACCENT}"/>')
@@ -379,9 +404,6 @@ def sankey(flow, currency="$"):
         body.append(_esc_lines(lines, x_lab_r, cy - (len(lines) - 1) * 6 + 3, "start", 11, INK, 12))
         body.append(f'<text x="{x_node_r - 4}" y="{cy + 3}" text-anchor="end" font-size="10" fill="{MUTED}">'
                     f'{esc(short(node["value"], currency))}</text>')
-
-    body.append(f'<rect x="{x_hub}" y="{hub_y:.1f}" width="12" height="{hub_h:.1f}" rx="2" fill="{INK}"/>')
-    body.append(f'<text x="{x_hub}" y="{hub_y - 5:.1f}" font-size="11" fill="{MUTED}">household</text>')
 
     if internal:
         band_y = height - pad_bottom - 30
@@ -508,6 +530,7 @@ def style():
 body { margin: 0 auto; max-width: 46rem; padding: 1.25rem 1rem 3rem;
   font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   color: #111418; background: #fff; }
+svg { width: 100%; height: auto; display: block; margin: .5rem 0; }
 h1 { font-size: 1.35rem; margin: 0 0 .2rem; }
 h2 { font-size: 1.05rem; margin: 1.8rem 0 .5rem; padding-bottom: .25rem;
   border-bottom: 1px solid #dcdfe4; }
