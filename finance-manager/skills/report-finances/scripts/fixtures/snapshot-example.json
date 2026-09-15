@@ -1,29 +1,72 @@
 {
   "month": "2026-08",
   "generated_at": "2026-09-01T13:05:00Z",
-  "generated_by": "synthetic fixture — not a real household",
+  "generated_by": "synthetic fixture \u2014 not a real household",
   "as_of": {
     "ledger": "2026-09-01T13:02:11Z",
     "chain": "2026-09-01T13:04:02Z",
     "manual_entry": "2026-08-31"
   },
   "summary": "Synthetic sample month. Spending landed slightly under plan while savings stayed flat, mainly because two accounts have not reported since June. The flow chart is built from matched transfer pairs, so the movement between the household's own accounts appears as a band of its own instead of as spending.",
-
   "highlights": [
-    { "text": "Consumption was about 8% under the three-month average.", "label": "fact" },
-    { "text": "One brokerage account has not reported a balance since June.", "label": "fact" },
-    { "text": "At this rate the emergency fund passes its target early next spring.", "label": "projection" }
+    {
+      "text": "Consumption was about 8% under the three-month average.",
+      "label": "fact"
+    },
+    {
+      "text": "One brokerage account has not reported a balance since June.",
+      "label": "fact"
+    },
+    {
+      "text": "At this rate the emergency fund passes its target early next spring.",
+      "label": "projection"
+    }
   ],
-
   "net_worth": {
     "as_of": "2026-09-01T13:02:11Z",
     "total": 142580,
     "buckets": [
-      { "name": "Liquid Cash", "value": 18400, "basis": "measured", "as_of": "2026-09-01T13:02:11Z", "note": "" },
-      { "name": "Tax Shelters", "value": 63100, "basis": "measured", "as_of": "2026-09-01T13:02:11Z", "note": "" },
-      { "name": "Home Equity", "value": 52480, "basis": "reconstructed", "as_of": "2025-12-31", "note": "from the last stated valuation and the mortgage balance" },
-      { "name": "Bitcoin", "value": 3600, "basis": "measured", "as_of": "2026-09-01T13:04:02Z", "note": "at cost basis, not market value" },
-      { "name": "Debt", "value": -5000, "basis": "measured", "as_of": "2026-09-01T13:02:11Z", "note": "credit card balance carried this month" }
+      {
+        "name": "Liquid Cash",
+        "value": 18400,
+        "basis": "measured",
+        "as_of": "2026-09-01T13:02:11Z",
+        "note": ""
+      },
+      {
+        "name": "Tax Shelters",
+        "value": 63100,
+        "basis": "measured",
+        "as_of": "2026-09-01T13:02:11Z",
+        "note": ""
+      },
+      {
+        "name": "Home Equity",
+        "value": 52480,
+        "basis": "reconstructed",
+        "as_of": "2025-12-31",
+        "note": "from the last stated valuation and the mortgage balance"
+      },
+      {
+        "name": "Bitcoin",
+        "value": 46461.1,
+        "basis": "market",
+        "as_of": "2026-09-01",
+        "note": "0.44053689 BTC, on-chain verified, at the month-end price",
+        "cost_basis": 27022.16,
+        "price": {
+          "currency": "CAD",
+          "rate": 105472,
+          "as_of": "2026-09-01T13:00:04Z"
+        }
+      },
+      {
+        "name": "Debt",
+        "value": -5000,
+        "basis": "measured",
+        "as_of": "2026-09-01T13:02:11Z",
+        "note": "credit card balance carried this month"
+      }
     ]
   },
   "net_worth_prior_year": {
@@ -32,22 +75,54 @@
     "basis": "reconstructed",
     "note": "built from transactions as far back as the backfill reaches"
   },
-
   "flow": {
     "income": [
-      { "name": "Salary — one", "amount": 6200 },
-      { "name": "Salary — two", "amount": 2800 },
-      { "name": "Interest", "amount": 140 }
+      {
+        "name": "Salary \u2014 one",
+        "amount": 6200
+      },
+      {
+        "name": "Salary \u2014 two",
+        "amount": 2800
+      },
+      {
+        "name": "Interest",
+        "amount": 140
+      }
     ],
     "expense": [
-      { "name": "Housing", "amount": 2140 },
-      { "name": "Groceries", "amount": 980 },
-      { "name": "Transport", "amount": 410 },
-      { "name": "Utilities", "amount": 260 },
-      { "name": "Insurance", "amount": 230 },
-      { "name": "Dining out", "amount": 320 },
-      { "name": "Travel", "amount": 640 },
-      { "name": "Everything else", "amount": 420 }
+      {
+        "name": "Housing",
+        "amount": 2140
+      },
+      {
+        "name": "Groceries",
+        "amount": 980
+      },
+      {
+        "name": "Transport",
+        "amount": 410
+      },
+      {
+        "name": "Utilities",
+        "amount": 260
+      },
+      {
+        "name": "Insurance",
+        "amount": 230
+      },
+      {
+        "name": "Dining out",
+        "amount": 320
+      },
+      {
+        "name": "Travel",
+        "amount": 640
+      },
+      {
+        "name": "Everything else",
+        "amount": 420
+      }
     ],
     "expense_basis": "consumption",
     "debt_paydown": {
@@ -56,79 +131,222 @@
       "note": "principal is debt paydown, not consumption"
     },
     "internal_transfers": 12856,
-    "savings": { "cash": 900, "cost_basis_assets": 400, "liabilities": 0 },
+    "savings": {
+      "cash": 900,
+      "cost_basis_assets": 400,
+      "liabilities": 0
+    },
     "off_budget_accounts": [
-      { "name": "Brokerage", "delta": 900, "kind": "cash", "basis": "manual", "not_updated_since": "2026-06-30" },
-      { "name": "Retirement", "delta": 620, "kind": "cost_basis", "basis": "measured", "not_updated_since": null },
-      { "name": "Savings", "delta": 280, "kind": "cash", "basis": "measured", "not_updated_since": null },
-      { "name": "Loan", "delta": -300, "kind": "liability", "basis": "measured", "not_updated_since": null }
+      {
+        "name": "Brokerage",
+        "delta": 900,
+        "kind": "cash",
+        "basis": "manual",
+        "not_updated_since": "2026-06-30"
+      },
+      {
+        "name": "Retirement",
+        "delta": 620,
+        "kind": "cost_basis",
+        "basis": "measured",
+        "not_updated_since": null
+      },
+      {
+        "name": "Savings",
+        "delta": 280,
+        "kind": "cash",
+        "basis": "measured",
+        "not_updated_since": null
+      },
+      {
+        "name": "Loan",
+        "delta": -300,
+        "kind": "liability",
+        "basis": "measured",
+        "not_updated_since": null
+      }
     ],
-    "transfer_pairs": { "matched": 14, "linked": 9, "window_days": 21 },
+    "transfer_pairs": {
+      "matched": 14,
+      "linked": 9,
+      "window_days": 21
+    },
     "off_budget_expense": [
-      { "name": "Property tax", "amount": 318, "note": "paid from an account that is not on the budget" }
+      {
+        "name": "Property tax",
+        "amount": 318,
+        "note": "paid from an account that is not on the budget"
+      }
     ]
   },
-
   "goals": [
-    { "name": "Emergency fund", "target": 24000, "current": 18400, "target_date": "2027-06-01", "on_track": true, "note": "on pace at the current contribution" },
-    { "name": "Home deposit top-up", "target": 40000, "current": 12200, "target_date": "2028-01-01", "on_track": false, "note": "behind by about two quarters of contributions" },
-    { "name": "Family trip", "target": 8000, "current": 6600, "target_date": "2027-03-01", "on_track": true, "note": "" }
+    {
+      "name": "Emergency fund",
+      "target": 24000,
+      "current": 18400,
+      "target_date": "2027-06-01",
+      "on_track": true,
+      "note": "on pace at the current contribution"
+    },
+    {
+      "name": "Home deposit top-up",
+      "target": 40000,
+      "current": 12200,
+      "target_date": "2028-01-01",
+      "on_track": false,
+      "note": "behind by about two quarters of contributions"
+    },
+    {
+      "name": "Family trip",
+      "target": 8000,
+      "current": 6600,
+      "target_date": "2027-03-01",
+      "on_track": true,
+      "note": ""
+    }
   ],
-
   "liquidity": {
     "liquid_cash": 18400,
     "monthly_consumption": 5400,
     "runway_months": 3.4,
     "note": "runway excludes the tax-sheltered accounts, which are not liquid without a penalty"
   },
-
   "allocation": [
-    { "name": "Cash", "value": 18400, "percent": 12.9 },
-    { "name": "Registered investments", "value": 63100, "percent": 44.2 },
-    { "name": "Home equity", "value": 52480, "percent": 36.8 },
-    { "name": "Bitcoin", "value": 3600, "percent": 2.5 },
-    { "name": "Other assets", "value": 5000, "percent": 3.5 }
+    {
+      "name": "Cash",
+      "value": 18400,
+      "percent": 12.9
+    },
+    {
+      "name": "Registered investments",
+      "value": 63100,
+      "percent": 44.2
+    },
+    {
+      "name": "Home equity",
+      "value": 52480,
+      "percent": 36.8
+    },
+    {
+      "name": "Bitcoin",
+      "value": 3600,
+      "percent": 2.5
+    },
+    {
+      "name": "Other assets",
+      "value": 5000,
+      "percent": 3.5
+    }
   ],
-
   "tax": {
     "room": [
-      { "name": "Retirement account", "used": 8200, "limit": 14000 },
-      { "name": "Tax-free account", "used": 5500, "limit": 7000 }
+      {
+        "name": "Retirement account",
+        "used": 8200,
+        "limit": 14000
+      },
+      {
+        "name": "Tax-free account",
+        "used": 5500,
+        "limit": 7000
+      }
     ],
     "observations": [
-      { "text": "About 5,700 of registered room is unclaimed for the year.", "label": "fact" },
-      { "text": "Contributing it before year end would reduce taxable income in this bracket.", "label": "advice" }
+      {
+        "text": "About 5,700 of registered room is unclaimed for the year.",
+        "label": "fact"
+      },
+      {
+        "text": "Contributing it before year end would reduce taxable income in this bracket.",
+        "label": "advice"
+      }
     ]
   },
-
   "findings": [
-    { "statement": "Two recurring subscriptions have not been used in three months.", "label": "fact", "check": "subscription drift", "impact": "about 42 a month, or 504 a year" },
-    { "statement": "Cash above the emergency-fund target is idle at a low rate.", "label": "fact", "check": "idle cash", "impact": "roughly 180 a year in forgone interest at current rates" },
-    { "statement": "The credit-card balance carried this month costs more than the savings rate earns.", "label": "projection", "check": "debt cost", "impact": "clearing it by December saves about 210" }
+    {
+      "statement": "Two recurring subscriptions have not been used in three months.",
+      "label": "fact",
+      "check": "subscription drift",
+      "impact": "about 42 a month, or 504 a year"
+    },
+    {
+      "statement": "Cash above the emergency-fund target is idle at a low rate.",
+      "label": "fact",
+      "check": "idle cash",
+      "impact": "roughly 180 a year in forgone interest at current rates"
+    },
+    {
+      "statement": "The credit-card balance carried this month costs more than the savings rate earns.",
+      "label": "projection",
+      "check": "debt cost",
+      "impact": "clearing it by December saves about 210"
+    }
   ],
-
   "narrative": {
     "statements": [
-      { "text": "Clear the carried credit-card balance before adding to the trip fund — the interest costs more than the trip fund earns, and the balance is small enough to close in two months.", "label": "advice", "reasoning": "the card rate is far above any savings rate available, so the ordering is unambiguous" },
-      { "text": "Keep the travel and dining categories as they are; they are the point of the plan, not the problem.", "label": "advice", "reasoning": "spending is under the three-month average and the shortfall is structural, not discretionary" }
+      {
+        "text": "Clear the carried credit-card balance before adding to the trip fund \u2014 the interest costs more than the trip fund earns, and the balance is small enough to close in two months.",
+        "label": "advice",
+        "reasoning": "the card rate is far above any savings rate available, so the ordering is unambiguous"
+      },
+      {
+        "text": "Keep the travel and dining categories as they are; they are the point of the plan, not the problem.",
+        "label": "advice",
+        "reasoning": "spending is under the three-month average and the shortfall is structural, not discretionary"
+      }
     ]
   },
-
   "actions": [
-    { "action": "Ask the brokerage for a current statement and enter the balance", "owner": "household", "carried_since": "2026-07", "status": "open" },
-    { "action": "Cancel the two unused subscriptions", "owner": "household", "carried_since": "2026-08", "status": "new" }
+    {
+      "action": "Ask the brokerage for a current statement and enter the balance",
+      "owner": "household",
+      "carried_since": "2026-07",
+      "status": "open"
+    },
+    {
+      "action": "Cancel the two unused subscriptions",
+      "owner": "household",
+      "carried_since": "2026-08",
+      "status": "new"
+    }
   ],
-
   "data_notes": [
-    { "note": "Brokerage balance is from June.", "reason": "no automatic feed, manual entry not yet supplied", "since": "2026-06-30" },
-    { "note": "Home value is a 2025 valuation.", "reason": "recomputed only when a new valuation is available", "since": "2025-12-31" },
-    { "note": "One loan still shows a balance although it was repaid.", "reason": "closure is a reconciliation job, not this report's", "since": "2026-07-26" },
-    { "note": "Crypto is held at cost basis.", "reason": "market value is not reconciled, so mixing it with cash on one axis would mislead", "since": "2026-08-31" }
+    {
+      "note": "Brokerage balance is from June.",
+      "reason": "no automatic feed, manual entry not yet supplied",
+      "since": "2026-06-30"
+    },
+    {
+      "note": "Home value is a 2025 valuation.",
+      "reason": "recomputed only when a new valuation is available",
+      "since": "2025-12-31"
+    },
+    {
+      "note": "One loan still shows a balance although it was repaid.",
+      "reason": "closure is a reconciliation job, not this report's",
+      "since": "2026-07-26"
+    },
+    {
+      "note": "Crypto is held at cost basis.",
+      "reason": "market value is not reconciled, so mixing it with cash on one axis would mislead",
+      "since": "2026-08-31"
+    }
   ],
-
   "inputs_used": [
-    { "source": "budget tool: accounts and transactions", "detail": "month 2026-08, after a bank sync", "manual": false },
-    { "source": "chain query: wallet balance", "detail": "descriptor address set", "manual": false },
-    { "source": "manual-balances.json", "detail": "brokerage entry carried forward from June", "manual": true }
+    {
+      "source": "budget tool: accounts and transactions",
+      "detail": "month 2026-08, after a bank sync",
+      "manual": false
+    },
+    {
+      "source": "chain query: wallet balance",
+      "detail": "descriptor address set",
+      "manual": false
+    },
+    {
+      "source": "manual-balances.json",
+      "detail": "brokerage entry carried forward from June",
+      "manual": true
+    }
   ]
 }

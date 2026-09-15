@@ -115,7 +115,7 @@ def validate(snap):
                     fail(f"narrative.statements[{i}].text", "missing statement text")
 
     for i, bucket in enumerate((snap.get("net_worth") or {}).get("buckets") or []):
-        if bucket.get("basis") not in ("measured", "reconstructed", "manual"):
+        if bucket.get("basis") not in ("measured", "reconstructed", "manual", "market"):
             fail(f"net_worth.buckets[{i}].basis",
                  "must be measured, reconstructed or manual")
 
@@ -612,9 +612,16 @@ def page(snap, series, currency="$"):
         cards = [f'<div class="metric"><div class="label">total</div>'
                  f'<div class="value">{esc(money(total, currency))}</div></div>']
         for bucket in buckets:
+            cost = bucket.get("cost_basis")
+            alongside = ""
+            if cost is not None:
+                gain = float(bucket.get("value") or 0) - float(cost or 0)
+                sign = "+" if gain >= 0 else ""
+                alongside = (f'<div class="muted small">cost {esc(money(cost, currency))} · '
+                             f'gain {sign}{esc(money(gain, currency))}</div>')
             cards.append(f'<div class="metric"><div class="label">{esc(bucket.get("name", ""))}</div>'
                          f'<div class="value">{esc(money(bucket.get("value"), currency))}</div>'
-                         f'{basis_mark(bucket.get("basis", "measured"))}</div>')
+                         f'{basis_mark(bucket.get("basis", "measured"))}{alongside}</div>')
         parts.append(f'<div class="grid">{"".join(cards)}</div>')
         parts.append(f'<h3>The series</h3>')
         parts.append(net_worth_line(series, currency))

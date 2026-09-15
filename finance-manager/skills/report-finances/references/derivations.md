@@ -44,6 +44,36 @@ checks the snapshot against.
 - The series is built by reading every `reports/*/snapshot.json`, which is why
   the snapshot is kept beside its page.
 
+### Crypto is valued at market, with its cost beside it
+
+Bitcoin is carried at **market value**, not cost, because that is what the
+household asked to see — but never market value *alone*: the bucket also carries
+`cost_basis`, so the page can print the gain beside the value, and the difference
+between the two is the point of holding the number at all.
+
+The snapshot records the price that produced it:
+
+```json
+{ "name": "Bitcoin", "value": 46461.10, "basis": "market", "cost_basis": 27022.16,
+  "as_of": "2026-09-30", "price": { "currency": "CAD", "rate": 105472, "as_of": "2026-09-30T13:00:04Z" },
+  "note": "0.44053689 BTC, on-chain verified, at the month-end price" }
+```
+
+A market figure without the price and the moment it was read is a number that rots
+silently, which is the failure this report exists to avoid: quote both, always.
+The price comes from `query-mempool price --currency CAD` (mempool.space).
+
+**Name crypto's share of net worth** in the data notes. A market-valued holding
+moves the total on its own, and a household reading a 20,000 swing needs to know
+whether that was spending or Bitcoin — otherwise a bad week in crypto reads as a
+budgeting failure and a good week reads as discipline.
+
+The quantity is verified on-chain (the descriptor scan), so the priced figure is
+`quantity x rate`. If a holding's quantity cannot be verified — the ShakePay
+balance, for instance — price what is verified and say on the page which holding
+is missing, rather than valuing the unverifiable part at cost and letting it look
+like market.
+
 ## Two distortions shown, not silently corrected
 
 - **Mortgage principal is booked as expense.** About 1,819 of the 3,221.07

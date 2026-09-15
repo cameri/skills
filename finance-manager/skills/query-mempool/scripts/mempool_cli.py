@@ -10,6 +10,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 
 DEFAULT_API_URLS = {
@@ -408,6 +409,9 @@ def _build_parser() -> argparse.ArgumentParser:
     address_parser.add_argument("address")
     address_parser.add_argument("--page", type=int, default=1, help="Tx history page (25 per page, default 1)")
 
+    price_parser = subparsers.add_parser("price", help="Current BTC price in a fiat currency")
+    price_parser.add_argument("--currency", default="CAD", help="Fiat code, e.g. CAD or USD (default CAD)")
+
     descriptor_parser = subparsers.add_parser(
         "descriptor", help="Derive addresses from a wallet descriptor and aggregate balance/history"
     )
@@ -438,6 +442,18 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "tx":
             tx = fetch_with_fallback(f"/tx/{args.txid}", api_urls)
             print(json.dumps(tx, indent=2) if args.json else render_tx(tx))
+        elif args.command == "price":
+            prices = fetch_with_fallback("/v1/prices", api_urls)
+            code = args.currency.upper()
+            if code not in prices:
+                available = ", ".join(sorted(k for k in prices if k != "time"))
+                print(f"no {code} price in the response; available: {available}", file=sys.stderr)
+                return 2
+            as_of = datetime.fromtimestamp(prices["time"], tz=timezone.utc).isoformat().replace("+00:00", "Z")
+            if args.json:
+                print(json.dumps({"currency": code, "price": prices[code], "as_of": as_of}, indent=2))
+            else:
+                print(f"{code} {prices[code]:,.2f}  as of {as_of} (source: mempool.space)")
         elif args.command == "address":
             summary = fetch_with_fallback(f"/address/{args.address}", api_urls)
             txs, has_more = fetch_address_txs_page(api_urls, args.address, args.page)

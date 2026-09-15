@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Bitcoin is valued at market, with its cost beside it. `finance-manager` 0.13.3.**
+  The household asked to see market value rather than cost, so the bucket carries
+  `basis: "market"` with `cost_basis` next to it and the page prints the gain — a
+  market figure without the number it was bought at is only half the story. The
+  snapshot records the price and the moment it was read, because a market value
+  without its timestamp rots silently; the data notes must name crypto's share of
+  net worth, so a bad week in Bitcoin does not read as a budgeting failure. Prices
+  come from the new `query-mempool price --currency CAD` (mempool.space, whose
+  `/v1/prices` endpoint returns CAD directly), and the renderer now accepts a
+  `market` basis and prints `cost … · gain …` under any bucket that carries one.
+
 ### Fixed
 - **The fund-flow Sankey draws properly now. `finance-manager` 0.13.2.** It is what it
   claimed to be: every node is a rectangle, every band is a constant-width link
