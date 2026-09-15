@@ -454,6 +454,11 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-sp
 .stale { border-style: solid; color: #9a6700; border-color: #9a6700; }
 .gap { border: 1px dashed #dcdfe4; border-radius: 8px; padding: .6rem .7rem; color: #5b6570;
   font-size: .9rem; margin: .6rem 0; }
+.status { border-left: 4px solid #5b6570; }
+.status-running { border-left-color: #1f6feb; }
+.status-waiting { border-left-color: #9a6700; }
+.status-failed { border-left-color: #cf222e; }
+.status-done { border-left-color: #1f883d; }
 .banner { border: 1px solid #9a6700; color: #9a6700; border-radius: 8px;
   padding: .5rem .7rem; margin: .6rem 0; font-size: .9rem; }
 .goal { margin: .7rem 0; }
@@ -646,8 +651,9 @@ def page(snap, series, currency="$"):
             f"<style>{style()}</style></head><body>{''.join(parts)}</body></html>")
 
 
-def index_page(months, currency="$"):
+def index_page(months, currency="$", status=None):
     """months: [(month, total|None, basis|None)] newest first."""
+    banner = status_card(status)
     if not months:
         body = '<p>No reports yet.</p>'
     else:
@@ -667,6 +673,7 @@ def index_page(months, currency="$"):
             "<title>Household financial reports</title>"
             f"<style>{style()}</style></head><body>"
             "<h1>Household financial reports</h1>"
+            f"{banner}"
             f"{body}"
             "<footer>Newest first. A month with no report shows as a gap rather than being omitted.</footer>"
             "</body></html>")
@@ -678,6 +685,57 @@ def index_page(months, currency="$"):
 
 def load(path):
     return json.loads(Path(path).read_text())
+
+
+STATUS_STATES = ("running", "waiting", "failed", "done")
+
+
+def load_status(reports_dir):
+    """The run's own status file, or None. A broken file is reported, never hidden."""
+    path = Path(reports_dir) / "status.json"
+    if not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        return {"state": "failed", "month": "", "since": "",
+                "note": f"status file is unreadable ({exc.__class__.__name__})"}
+    if not isinstance(data, dict) or data.get("state") not in STATUS_STATES:
+        return {"state": "failed", "month": "", "since": "",
+                "note": "status file does not name a known state"}
+    return data
+
+
+def status_card(status):
+    if not status:
+        return ""
+    state = status.get("state", "")
+    month = status.get("month") or ""
+    headline = {
+        "running": "report in progress",
+        "waiting": "waiting on something before it can finish",
+        "failed": "the run failed",
+        "done": "latest report complete",
+    }.get(state, state)
+    title = f"{month_label(month)} — {headline}" if month else headline
+    since = status.get("since") or ""
+    note = status.get("note") or ""
+    next_run = status.get("next_run") or ""
+    lines = []
+    if since:
+        lines.append(f'<span class="muted small">since {esc(since)}</span>')
+    if note:
+        lines.append(f'<div class="small">{esc(note)}</div>')
+    if next_run:
+        lines.append(f'<div class="muted small">next run {esc(next_run)}</div>')
+    if state == "failed":
+        lines.append('<div class="muted small">A failed run leaves the previous month in place; '
+                     'this page is the place it stays visible.</div>')
+    if state in ("running", "waiting"):
+        lines.append('<div class="muted small">Only the run itself updates this line, so if the '
+                     'timestamp is more than a day old, the run did not finish.</div>')
+    return (f'<div class="card status status-{esc(state)}"><strong>{esc(title)}</strong> '
+            f'{" ".join(lines)}</div>')
 
 
 def series_for(reports_dir):
@@ -739,9 +797,29 @@ def cmd_render(args):
         span = [month]
     totals = {m: (total, basis) for m, total, basis in series}
     rows = [(m, *totals.get(m, (None, None))) for m in reversed(span)]
-    (reports / "index.html").write_text(index_page(rows, currency))
+    (reports / "index.html").write_text(index_page(rows, currency, load_status(reports)))
 
     print(f"rendered {month_dir / 'index.html'} and {reports / 'index.html'}")
+    return 0
+
+
+def cmd_index(args):
+    """Regenerate only the index — for a status change with no new month."""
+    reports = Path(args.reports_dir)
+    series = series_for(reports)
+    known = [item[0] for item in series]
+    span = month_range(min(known), max(known)) if known else []
+    totals = {m: (total, basis) for m, total, basis in series}
+    rows = [(m, *totals.get(m, (None, None))) for m in reversed(span)]
+    currency = "$"
+    for snap_path in sorted(reports.glob("*/snapshot.json")):
+        try:
+            currency = load(snap_path).get("currency", currency)
+            break
+        except (OSError, json.JSONDecodeError):
+            continue
+    (reports / "index.html").write_text(index_page(rows, currency, load_status(reports)))
+    print(f"regenerated {reports / 'index.html'}")
     return 0
 
 
@@ -757,6 +835,10 @@ def main(argv=None):
     ren.add_argument("--snapshot", required=True)
     ren.add_argument("--reports-dir", required=True)
     ren.set_defaults(func=cmd_render)
+
+    idx = sub.add_parser("index", help="regenerate only the index (status change, no new month)")
+    idx.add_argument("--reports-dir", required=True)
+    idx.set_defaults(func=cmd_index)
 
     args = parser.parse_args(argv)
     return args.func(args)

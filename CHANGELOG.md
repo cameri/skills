@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **The report's status is on the page. `finance-manager` 0.13.0.** A run now writes
+  `reports/status.json` (`running` / `waiting` / `failed` / `done`) at every phase
+  boundary and regenerates the index, so "nothing since July" and "August is being
+  built right now" stop looking identical to the household reading the page. A failed
+  run says so on the page instead of leaving `running` standing, an unreadable status
+  file names itself rather than vanishing, and `render.py index` refreshes the page
+  without re-rendering any month. Requested by Cameri minutes after the hosting went
+  live, which is the shape of feedback this is meant to take.
 - **`report-finances` — the monthly household financial report. `finance-manager` 0.12.0.**
   A new skill that renders one self-contained HTML page per month from a JSON snapshot,
   with a fund-flow Sankey, net worth against the same month last year, goal progress,

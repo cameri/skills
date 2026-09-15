@@ -65,6 +65,7 @@ though retirement were near.
 <reference_index>
 - `references/snapshot-schema.md` — the JSON contract, and the validation rules the renderer enforces
 - `references/derivations.md` — how each figure must be derived, and why the naive version was measured wrong
+- `references/status-file.md` — `reports/status.json`, which is how a run says on the page that it is in progress (and how a failure stays visible)
 </reference_index>
 
 <assets_index>

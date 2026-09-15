@@ -4,6 +4,29 @@ One run per month, on the 1st, for the month just ended. Follow the steps in
 order. **A run that cannot complete a step records the gap and continues** — it
 never substitutes a zero, a guess, or last month's figure.
 
+## 0. Say that you have started
+
+Before anything else, write `docs/finance/reports/status.json` per
+`references/status-file.md`:
+
+```json
+{ "state": "running", "month": "YYYY-MM", "since": "<now, ISO-8601 UTC>",
+  "note": "collecting balances and spend" }
+```
+
+Then refresh the page that the household reads:
+
+```sh
+python3 scripts/render.py index --reports-dir docs/finance/reports
+```
+
+Update the same file at each phase boundary — `waiting` (with what you are
+waiting for in `note`) if you have to stop for a human, `failed` (with the
+reason) if you cannot finish, `done` at the end. **Never leave `running`
+standing on a run that has stopped**: a status that says someone is on it when
+nobody is, is worse than no status at all. Regenerate the index after each
+change; that command alone is enough, and no month's page is re-rendered.
+
 ## 1. Refresh the data
 
 - Trigger a bank sync through `actual-budget:query-budget`, then read back the
