@@ -20,7 +20,7 @@ Monorepo of Claude Code plugins and slash commands by Ricardo Arturo Cabral Mej�
 | [doubt-driven-development](./doubt-driven-development/) | Adversarial fresh-context review of non-trivial in-flight decisions before they stand — CLAIM, EXTRACT, DOUBT, RECONCILE, STOP — with optional user-authorized cross-model escalation | Claude |
 | [elevenlabs](./elevenlabs/) | Generate speech, transcribe audio, create music and sound effects, and build voice agents using the ElevenLabs API | Claude + Cursor |
 | [executable-skepticism](./executable-skepticism/) | Verification protocol that turns a theory, paper, model, or confident quantitative claim into a falsifiable, runnable test instead of a debate in prose | Claude |
-| [finance-manager](./finance-manager/) | Reconcile bank statements against ActualBudget, run household financial reviews (net worth, goal tracking, optimization), look up Bitcoin transactions/addresses/wallet descriptors via mempool.space, and onboard or manage the plugin's tracked accounts, wallets, and periodic sync jobs | Claude + Cursor |
+| [finance-manager](./finance-manager/) | Reconcile bank statements against ActualBudget, run household financial reviews (net worth, goal tracking, optimization), render the monthly household report as a self-contained HTML page, look up Bitcoin transactions/addresses/wallet descriptors via mempool.space, and onboard or manage the plugin's tracked accounts, wallets, and periodic sync jobs | Claude + Cursor |
 | [github-manager](./github-manager/) | Autonomous GitHub repository manager — handles webhook events for issues, PRs, discussions, CI failures, and security alerts | Claude |
 | [home-assistant](./home-assistant/) | Interact with Home Assistant via the REST API — get entity states, call services, fire events, render Jinja2 templates, and query state history | Claude + Cursor |
 | [immune-system](./immune-system/) | Defensive security monitor for the agent instance — watches skills, plugins, and hooks for new or changed content, quarantines confirmed threats, alerts the operator, and removes only on confirmation | Claude |
@@ -111,6 +111,7 @@ Monorepo of Claude Code plugins and slash commands by Ricardo Arturo Cabral Mej�
 | `/finance-manager:manage-paperless-workflows` | Create or fix Paperless-ngx workflows so bank statement documents auto-tag correctly |
 | `/finance-manager:query-mempool` | Look up Bitcoin transactions, addresses, and wallet descriptor (single-sig or multisig) balances/history via the mempool.space API |
 | `/finance-manager:review-finances` | Run a household financial review — execution audit, net worth/liquidity check, tax/expense optimization scan, and a single-sitting report with goal tracking and up to 3 next actions |
+| `/finance-manager:report-finances` | Render the monthly household financial report — a self-contained, phone-readable HTML page per month from a JSON snapshot: fund-flow Sankey, net worth against last year, goals, liquidity, allocation, tax, labeled findings and advice, and the data gaps named |
 
 ### github-manager
 
