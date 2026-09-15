@@ -1,7 +1,7 @@
 {
   "name": "finance-manager",
   "description": "An evolving financial-planning system with an accountant's and financial planner's mindset \u2014 reconciles bank statements against ActualBudget today, and grows toward full financial-state understanding across accumulation and decumulation phases. See VISION.md.",
-  "version": "0.13.0",
+  "version": "0.13.1",
   "keywords": [
     "finance",
     "budget",

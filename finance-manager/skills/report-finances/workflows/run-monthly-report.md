@@ -41,6 +41,19 @@ Balances no API reaches — Questrade, EQ, ShakePay, Ledn, and a home valuation 
 live in `docs/finance/manual-balances.json`, keyed by account with a `date` and
 a `note`. Read the entries for this month.
 
+The shape, because it is read by a run that must not guess:
+
+```json
+{ "currency": "CAD",
+  "accounts": {
+    "<account id from the finance-manager config>": {
+      "balance": 7812.96, "date": "2026-09-15", "note": "read by Cameri" } } }
+```
+
+Key it by the config's account **id**, not its display name, so a renamed account
+cannot silently orphan a balance. A real zero is written as `0` and is a fact; a
+missing entry is not a zero, and the two must never render the same way.
+
 **If an account has no entry for this month, do not block and do not zero it:**
 carry the last entry forward with `not_updated_since` set to that entry's date,
 so the page shows a dated staleness marker. If the file does not exist at all
