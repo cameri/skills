@@ -256,8 +256,8 @@ def _esc_lines(lines, x, y, anchor, size, fill, line_height=None):
 def sankey(flow, currency="$"):
     """Income -> the household -> destinations, as a three-column sankey.
 
-    A three-column flow: income on the left, the household in the middle, the
-    destinations on the right. Every node is a rectangle and every link is a filled
+    A two-column flow: income on the left, its destinations on the right, every link
+    drawn straight between them. Every node is a rectangle and every link is a filled
     straight ribbon whose thickness is that link's share, so magnitude is readable
     without the labels - except for the smallest flows, which are held at a 9-unit
     floor so a $68 flow stays visible next to a $3,114 one. Measured after the
