@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **All the month's arithmetic is now a program. `finance-manager` 0.14.0.** `report-finances/scripts/derive.py` computes every figure the page shows from the ledger and from explicitly-supplied inputs, so the model writes only the narrative, the actions and the prose. The derivation rules were always written down; until now a model executed them in its head, which is what Cameri objected to. The script fails loudly rather than guessing - a missing balance, an unavailable price or an account in no bucket is reported, never dropped - and it syncs the ledger before every read, because a stale cache reads as a plausible fraction of a month, the most dangerous kind of wrong. Verified by re-deriving August: net worth lands within 0.09% of the published figure, tax shelters and home equity match exactly, and the remaining differences are named in the changelog of the run that retires them.
+- **`query-mempool price`** reads the CAD rate from mempool.space (`/v1/prices`), with the historical endpoint used for a past month so a market figure never wears a timestamp it was not measured at.
+
+### Fixed
+- **`actual-budget`'s CLI was two versions behind the budget it reads** (0.1.5). The
+  `@actual-app/cli` install was pinned at 26.7.0 while the budget's schema had moved
+  on, and every read failed with `Database is out of sync with migrations (index past
+  available)` - so the ledger was **unreadable** and the next monthly run would have
+  failed with no warning. Upgraded to 26.9.0 (`package-lock.json` updated; the plugin's
+  own `package.json` already said `latest`, the lockfile was the pin).
+
+### Added
 - **Bitcoin is valued at market, with its cost beside it. `finance-manager` 0.13.3.**
   The household asked to see market value rather than cost, so the bucket carries
   `basis: "market"` with `cost_basis` next to it and the page prints the gain — a

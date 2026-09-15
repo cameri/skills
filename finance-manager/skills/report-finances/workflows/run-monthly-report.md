@@ -63,6 +63,29 @@ into a report that fails without them stops producing the report.
 
 ## 3. Derive the figures
 
+**Run `scripts/derive.py`. Do not do this arithmetic yourself.** The figures on the
+page are computed by that script from the ledger and from inputs you supply
+(`--manual-balances`, `--home-value`, `--mortgage-balance`, `--mortgage-principal`,
+`--bitcoin-quantity`); the rules it implements are `references/derivations.md`. It
+writes the numeric half of the snapshot and refuses to guess: a missing balance, a
+missing price or an account in no bucket is reported, never silently dropped.
+
+```bash
+set -a; source ~/.claude/channels/actual-budget/.env; set +a
+export ACTUAL_SERVER_URL="${ACTUAL_SERVER_URL:-$SERVER_URL}" ACTUAL_PASSWORD="${ACTUAL_PASSWORD:-$PASSWORD}"
+export ACTUAL_SYNC_ID="${ACTUAL_SYNC_ID:-$SYNC_ID}" ACTUAL_DATA_DIR="${ACTUAL_DATA_DIR:-$DATA_DIR}"
+export ACTUAL_ENCRYPTION_PASSWORD="${ACTUAL_ENCRYPTION_PASSWORD:-$ENCRYPTION_PASSWORD}"
+python3 scripts/derive.py --month YYYY-MM --config ~/.claude/channels/finance-manager/config.json \
+  --manual-balances docs/finance/manual-balances.json --home-value <n> --mortgage-balance <n> \
+  --mortgage-principal <n> --out /tmp/numbers.json
+```
+
+Your job is then the prose: `highlights`, `narrative`, `actions` and `findings` -
+judgment, never arithmetic. If a derived figure looks wrong, fix the rule in
+`derive.py` or `derivations.md` and re-run it; do not adjust the number by hand.
+
+### What each rule means, if you need to check one
+
 Apply `references/derivations.md` exactly — it is the part of this workflow that
 has been measured against live data, and the naive version of each rule is a
 known, recorded error:

@@ -3,6 +3,6 @@
   "version": "0.1.4",
   "type": "module",
   "dependencies": {
-    "@actual-app/cli": "latest"
+    "@actual-app/cli": "^26.9.0"
   }
 }
